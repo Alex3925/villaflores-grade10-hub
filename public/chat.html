@@ -12,21 +12,22 @@
     <link rel="manifest" href="https://villaflorescollege.s3.us-west-2.amazonaws.com/favicons/site.webmanifest">
     
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
         
         body {
-            background-color: #f5f5f5;
-            color: #333;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background: linear-gradient(135deg, #3498db, #8e44ad);
+            color: #fff;
         }
         
         .backdrop {
@@ -38,8 +39,9 @@
             background-image: url("https://villaflorescollege.s3.us-west-2.amazonaws.com/SCHOOL_BACKDROP.jpg");
             background-size: cover;
             background-position: center;
-            opacity: 0.3;
+            opacity: 0.1;
             z-index: -1;
+            animation: fadeIn 1s ease-in;
         }
         
         .container {
@@ -53,76 +55,102 @@
         }
         
         .logo {
-            max-width: 200px;
+            max-width: 150px;
             margin-bottom: 1rem;
+            animation: slideIn 0.8s ease-out;
         }
         
         h1 {
-            font-size: 2rem;
-            color: #2c3e50;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             margin-bottom: 1rem;
+            animation: fadeInUp 0.8s ease-out;
         }
         
         .chat-container {
             width: 100%;
-            max-width: 800px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
-            height: 500px;
+            height: 600px;
+            overflow: hidden;
         }
         
         .chat-header {
-            background-color: #3498db;
+            background: linear-gradient(45deg, #3498db, #2980b9);
             color: white;
             padding: 1rem;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-weight: 600;
         }
         
         .chat-header span {
+            font-size: 1rem;
+        }
+        
+        .chat-header a {
+            color: white;
+            text-decoration: none;
             font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        
+        .chat-header a:hover {
+            color: #ecf0f1;
         }
         
         .chat-messages {
             flex: 1;
-            padding: 1rem;
+            padding: 1.5rem;
             overflow-y: auto;
-            background-color: #f9f9f9;
+            background: #f9f9f9;
+            scroll-behavior: smooth;
         }
         
         .message {
             margin-bottom: 1rem;
-            padding: 0.5rem;
-            border-radius: 5px;
-            max-width: 80%;
+            padding: 0.8rem 1.2rem;
+            border-radius: 15px;
+            max-width: 70%;
+            position: relative;
+            animation: slideInMessage 0.3s ease-out;
         }
         
         .message.sent {
-            background-color: #3498db;
+            background: linear-gradient(45deg, #3498db, #2980b9);
             color: white;
             margin-left: auto;
+            border-bottom-right-radius: 5px;
         }
         
         .message.received {
-            background-color: #ecf0f1;
+            background: #ecf0f1;
             color: #333;
+            border-bottom-left-radius: 5px;
         }
         
         .message-header {
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-bottom: 0.2rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
         }
         
         .message-timestamp {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: #7f8c8d;
+            margin-top: 0.3rem;
         }
         
         .message-file {
@@ -132,9 +160,12 @@
         .message-file a {
             color: #3498db;
             text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s;
         }
         
         .message-file a:hover {
+            color: #2980b9;
             text-decoration: underline;
         }
         
@@ -143,47 +174,93 @@
             color: #e74c3c;
             cursor: pointer;
             font-size: 0.8rem;
+            transition: color 0.3s;
+        }
+        
+        .delete-btn:hover {
+            color: #c0392b;
         }
         
         .chat-input {
             display: flex;
             padding: 1rem;
-            border-top: 1px solid #ccc;
-            background-color: white;
-            border-bottom-left-radius: 10px;
-            border-bottom-right-radius: 10px;
+            border-top: 1px solid #ddd;
+            background: rgba(255, 255, 255, 0.95);
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
         }
         
         .chat-input input[type="text"] {
             flex: 1;
             padding: 0.8rem;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
             margin-right: 1rem;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .chat-input input[type="text"]:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
         }
         
         .chat-input input[type="file"] {
             margin-right: 1rem;
+            font-size: 0.9rem;
         }
         
         .chat-input button {
             padding: 0.8rem 1.5rem;
-            background-color: #3498db;
+            background: linear-gradient(45deg, #3498db, #2980b9);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-weight: 600;
             cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
         
         .chat-input button:hover {
-            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
         
         footer {
             text-align: center;
             padding: 1rem;
-            background-color: #2c3e50;
+            background: rgba(44, 62, 80, 0.9);
+            backdrop-filter: blur(10px);
             color: white;
+            font-size: 0.9rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes slideInMessage {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            .logo { max-width: 120px; }
+            .chat-container { height: 500px; }
+            .message { max-width: 85%; }
         }
     </style>
 </head>
@@ -193,16 +270,16 @@
     <div class="container">
         <img src="https://villaflorescollege.s3.us-west-2.amazonaws.com/SCHOOL_LOGO.png" alt="Villaflores College Logo" class="logo">
         <h1>Grade 10 Hub - Chat Room</h1>
-        <div class="chat-container">
+        <div class="chat-container" role="region" aria-label="Chat Room">
             <div class="chat-header">
                 <span>Welcome, <span id="username"></span></span>
-                <a href="/index.html" style="color: white; text-decoration: none;">Logout</a>
+                <a href="/index.html" aria-label="Logout">Logout</a>
             </div>
-            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
             <form class="chat-input" id="chatForm">
-                <input type="text" id="messageInput" placeholder="Type your message..." required>
-                <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.jpg,.png">
-                <button type="submit">Send</button>
+                <input type="text" id="messageInput" placeholder="Type your message..." required aria-label="Message input">
+                <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.jpg,.png" aria-label="Upload file">
+                <button type="submit" aria-label="Send message">Send</button>
             </form>
         </div>
     </div>
@@ -231,14 +308,15 @@
         function displayMessage(message) {
             const div = document.createElement('div');
             div.className = `message ${message.username === username ? 'sent' : 'received'}`;
+            div.setAttribute('aria-label', `Message from ${message.username}`);
             div.innerHTML = `
                 <div class="message-header">
                     ${message.username}
                     ${message.username === username || username === 'admin' ? 
-                        `<span class="delete-btn" onclick="deleteMessage(${message.id})">[Delete]</span>` : ''}
+                        `<span class="delete-btn" onclick="deleteMessage(${message.id})" aria-label="Delete message">[Delete]</span>` : ''}
                 </div>
                 <div>${message.text}</div>
-                ${message.file ? `<div class="message-file"><a href="${message.file}" target="_blank">View File</a></div>` : ''}
+                ${message.file ? `<div class="message-file"><a href="${message.file}" target="_blank" aria-label="View uploaded file">View File</a></div>` : ''}
                 <div class="message-timestamp">${new Date(message.timestamp).toLocaleString()}</div>
             `;
             chatMessages.appendChild(div);
@@ -272,6 +350,7 @@
             socket.emit('sendMessage', message);
             messageInput.value = '';
             fileInput.value = '';
+            messageInput.focus();
         });
 
         function deleteMessage(messageId) {
