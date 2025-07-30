@@ -1,1 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Villaflores College Hub G10 - In Development</title>
+    
+    <link rel="icon" type="image/x-icon" href="https://villaflorescollege.s3.us-west-2.amazonaws.com/favicons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://villaflorescollege.s3.us-west-2.amazonaws.com/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://villaflorescollege.s3.us-west-2.amazonaws.com/favicons/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://villaflorescollege.s3.us-west-2.amazonaws.com/favicons/apple-touch-icon.png">
+    <link rel="manifest" href="https://villaflorescollege.s3.us-west-2.amazonaws.com/favicons/site.webmanifest">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("https://villaflorescollege.s3.us-west-2.amazonaws.com/SCHOOL_BACKDROP.jpg");
+            background-size: cover;
+            background-position: center;
+            opacity: 0.3;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .logo {
+            max-width: 300px;
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+        
+        .coming-soon {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 1.5rem;
+        }
+        
+        .contact, .login-btn {
+            margin-top: 1rem;
+            padding: 1rem 2rem;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            display: inline-block;
+        }
+        
+        .contact:hover, .login-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #2c3e50;
+            color: white;
+        }
 
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+            text-align: left;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .modal-content label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .modal-content input.error {
+            border-color: #e74c3c;
+        }
+
+        .modal-content .error-message {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .modal-content .password-container {
+            position: relative;
+        }
+
+        .modal-content .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #3498db;
+        }
+
+        .modal-content button {
+            width: 100%;
+            padding: 1rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .modal-content button:hover {
+            background-color: #2980b9;
+        }
+
+        .modal-content button:disabled {
+            background-color: #7f8c8d;
+            cursor: not-allowed;
+        }
+
+        .forgot-password {
+            display: block;
+            text-align: center;
+            margin-top: 1rem;
+            color: #3498db;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            color: #333;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="backdrop"></div>
+    
+    <div class="container">
+        <img src="https://villaflorescollege.s3.us-west-2.amazonaws.com/SCHOOL_LOGO.png" alt="Villaflores College Logo" class="logo">
+        <h1>Welcome to Villaflores College</h1>
+        <p>We are currently working on our new website to serve you better. Please check back soon for updates and information about our programs and services.</p>
+        <p class="coming-soon">Website Under Construction</p>
+        <a href="mailto:info@villaflorescollege.edu.ph" class="contact">Contact Us</a>
+        <a href="#" class="login-btn" onclick="openModal()">Login</a>
+    </div>
+    
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Login to Your Account</h2>
+            <form id="loginForm">
+                <label for="username">Username or Email</label>
+                <input type="text" id="username" name="username" required>
+                <div class="error-message" id="username-error">Please enter a username or email.</div>
+                
+                <label for="password">Password</label>
+                <div class="password-container">
+                    <input type="password" id="password" name="password" required>
+                    <span class="toggle-password" onclick="togglePassword()">Show</span>
+                </div>
+                <div class="error-message" id="password-error">Please enter a password.</div>
+                <div class="error-message" id="server-error"></div>
+                
+                <button type="submit" id="loginButton">Login</button>
+                <a href="mailto:info@villaflorescollege.edu.ph?subject=Forgot%20Password" class="forgot-password">Forgot Password?</a>
+            </form>
+        </div>
+    </div>
+    
+    <footer>
+        &copy; 2025 Villaflores College. All Rights Reserved.
+    </footer>
+
+    <script>
+        function openModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('username-error').style.display = 'none';
+            document.getElementById('password-error').style.display = 'none';
+            document.getElementById('server-error').style.display = 'none';
+            document.getElementById('username').classList.remove('error');
+            document.getElementById('password').classList.remove('error');
+            document.getElementById('loginButton').disabled = false;
+            document.getElementById('loginButton').textContent = 'Login';
+        }
+
+        function closeModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleText = document.querySelector('.toggle-password');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleText.textContent = 'Hide';
+            } else {
+                passwordInput.type = 'password';
+                toggleText.textContent = 'Show';
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            let valid = true;
+            const username = document.getElementById('username');
+            const password = document.getElementById('password');
+            const usernameError = document.getElementById('username-error');
+            const passwordError = document.getElementById('password-error');
+            const serverError = document.getElementById('server-error');
+            const loginButton = document.getElementById('loginButton');
+
+            usernameError.style.display = 'none';
+            passwordError.style.display = 'none';
+            serverError.style.display = 'none';
+            username.classList.remove('error');
+            password.classList.remove('error');
+
+            if (!username.value.trim()) {
+                usernameError.style.display = 'block';
+                username.classList.add('error');
+                valid = false;
+            }
+            if (!password.value.trim()) {
+                passwordError.style.display = 'block';
+                password.classList.add('error');
+                valid = false;
+            }
+
+            if (!valid) return;
+
+            loginButton.disabled = true;
+            loginButton.textContent = 'Logging in...';
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: username.value.trim(),
+                        password: password.value.trim()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('username', data.username);
+                    closeModal();
+                    window.location.href = '/chat.html';
+                } else {
+                    serverError.textContent = data.error || 'An error occurred';
+                    serverError.style.display = 'block';
+                }
+            } catch (error) {
+                serverError.textContent = 'Network error, please try again';
+                serverError.style.display = 'block';
+            } finally {
+                loginButton.disabled = false;
+                loginButton.textContent = 'Login';
+            }
+        });
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
