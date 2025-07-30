@@ -109,6 +109,37 @@
             color: #ecf0f1;
         }
         
+        .chat-controls {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .chat-controls button {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .chat-controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .chat-controls button:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
         .chat-messages {
             flex: 1;
             padding: 1.5rem;
@@ -227,6 +258,62 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
         
+        .video-call-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .video-call-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 800px;
+            width: 90%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .video-call-content video {
+            width: 100%;
+            max-width: 350px;
+            border-radius: 10px;
+            margin: 0.5rem;
+            border: 2px solid #ddd;
+        }
+        
+        .video-call-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .video-call-controls button {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .video-call-controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
         footer {
             text-align: center;
             padding: 1rem;
@@ -261,6 +348,7 @@
             .logo { max-width: 120px; }
             .chat-container { height: 500px; }
             .message { max-width: 85%; }
+            .video-call-content video { max-width: 100%; }
         }
     </style>
 </head>
@@ -275,12 +363,26 @@
                 <span>Welcome, <span id="username"></span></span>
                 <a href="/index.html" aria-label="Logout">Logout</a>
             </div>
+            <div class="chat-controls">
+                <button id="startVoiceCall" aria-label="Start voice call">Voice Call</button>
+                <button id="startVideoCall" aria-label="Start video call">Video Call</button>
+            </div>
             <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
             <form class="chat-input" id="chatForm">
                 <input type="text" id="messageInput" placeholder="Type your message..." required aria-label="Message input">
                 <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.jpg,.png" aria-label="Upload file">
                 <button type="submit" aria-label="Send message">Send</button>
             </form>
+        </div>
+    </div>
+    
+    <div id="videoCallModal" class="video-call-modal" role="dialog" aria-label="Video Call">
+        <div class="video-call-content">
+            <video id="localVideo" autoplay muted playsinline></video>
+            <video id="remoteVideo" autoplay playsinline></video>
+            <div class="video-call-controls">
+                <button id="endCall" aria-label="End call">End Call</button>
+            </div>
         </div>
     </div>
     
@@ -304,6 +406,22 @@
         const chatForm = document.getElementById('chatForm');
         const messageInput = document.getElementById('messageInput');
         const fileInput = document.getElementById('fileInput');
+        const startVoiceCallBtn = document.getElementById('startVoiceCall');
+        const startVideoCallBtn = document.getElementById('startVideoCall');
+        const videoCallModal = document.getElementById('videoCallModal');
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+        const endCallBtn = document.getElementById('endCall');
+
+        let localStream = null;
+        let peerConnection = null;
+        let targetUser = null;
+
+        const configuration = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' }
+            ]
+        };
 
         function displayMessage(message) {
             const div = document.createElement('div');
@@ -367,6 +485,153 @@
         document.querySelector('.chat-header a').addEventListener('click', () => {
             localStorage.removeItem('token');
             localStorage.removeItem('username');
+        });
+
+        // WebRTC Call Logic
+        async function startCall(isVideo) {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: isVideo
+                });
+                localVideo.srcObject = localStream;
+                videoCallModal.style.display = 'flex';
+
+                peerConnection = new RTCPeerConnection(configuration);
+                
+                localStream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, localStream);
+                });
+
+                peerConnection.ontrack = (event) => {
+                    remoteVideo.srcObject = event.streams[0];
+                };
+
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        socket.emit('ice-candidate', {
+                            target: targetUser,
+                            candidate: event.candidate
+                        });
+                    }
+                };
+
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                socket.emit('offer', { offer, target: targetUser });
+            } catch (error) {
+                console.error('Error starting call:', error);
+                alert('Failed to start call: ' + error.message);
+                endCall();
+            }
+        }
+
+        function endCall() {
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            localVideo.srcObject = null;
+            remoteVideo.srcObject = null;
+            videoCallModal.style.display = 'none';
+            socket.emit('end-call', { target: targetUser });
+            targetUser = null;
+            startVoiceCallBtn.disabled = false;
+            startVideoCallBtn.disabled = false;
+        }
+
+        startVoiceCallBtn.addEventListener('click', () => {
+            targetUser = prompt('Enter username to call (e.g., student or admin):');
+            if (targetUser && targetUser !== username) {
+                startVoiceCallBtn.disabled = true;
+                startVideoCallBtn.disabled = true;
+                startCall(false);
+            }
+        });
+
+        startVideoCallBtn.addEventListener('click', () => {
+            targetUser = prompt('Enter username to call (e.g., student or admin):');
+            if (targetUser && targetUser !== username) {
+                startVoiceCallBtn.disabled = true;
+                startVideoCallBtn.disabled = true;
+                startCall(true);
+            }
+        });
+
+        endCallBtn.addEventListener('click', endCall);
+
+        socket.on('offer', async (data) => {
+            if (data.target === username) {
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({
+                        audio: true,
+                        video: data.offer.type === 'video'
+                    });
+                    localVideo.srcObject = localStream;
+                    videoCallModal.style.display = 'flex';
+                    targetUser = data.sender;
+
+                    peerConnection = new RTCPeerConnection(configuration);
+                    
+                    localStream.getTracks().forEach(track => {
+                        peerConnection.addTrack(track, localStream);
+                    });
+
+                    peerConnection.ontrack = (event) => {
+                        remoteVideo.srcObject = event.streams[0];
+                    };
+
+                    peerConnection.onicecandidate = (event) => {
+                        if (event.candidate) {
+                            socket.emit('ice-candidate', {
+                                target: targetUser,
+                                candidate: event.candidate
+                            });
+                        }
+                    };
+
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                    const answer = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(answer);
+                    socket.emit('answer', { answer, target: data.sender });
+                } catch (error) {
+                    console.error('Error handling offer:', error);
+                    alert('Failed to accept call: ' + error.message);
+                    endCall();
+                }
+            }
+        });
+
+        socket.on('answer', async (data) => {
+            if (data.target === username) {
+                try {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+                } catch (error) {
+                    console.error('Error handling answer:', error);
+                    alert('Error accepting call: ' + error.message);
+                    endCall();
+                }
+            }
+        });
+
+        socket.on('ice-candidate', async (data) => {
+            if (data.target === username && peerConnection) {
+                try {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                } catch (error) {
+                    console.error('Error adding ICE candidate:', error);
+                }
+            }
+        });
+
+        socket.on('end-call', (data) => {
+            if (data.target === username) {
+                endCall();
+            }
         });
     </script>
 </body>
