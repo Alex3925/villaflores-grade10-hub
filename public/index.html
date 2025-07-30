@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Villaflores College Hub G10 - In Development</title>
+    <title>Villaflores College - Grade 10 Hub</title>
     
     <link rel="icon" type="image/x-icon" href="https://villaflorescollege.s3.us-west-2.amazonaws.com/favicons/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="https://villaflorescollege.s3.us-west-2.amazonaws.com/favicons/favicon-32x32.png">
@@ -11,20 +11,23 @@
     <link rel="apple-touch-icon" sizes="180x180" href="https://villaflorescollege.s3.us-west-2.amazonaws.com/favicons/apple-touch-icon.png">
     <link rel="manifest" href="https://villaflorescollege.s3.us-west-2.amazonaws.com/favicons/site.webmanifest">
     
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
         
         body {
-            background-color: #f5f5f5;
-            color: #333;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background: linear-gradient(135deg, #3498db, #8e44ad);
+            color: #fff;
+            overflow-x: hidden;
         }
         
         .backdrop {
@@ -36,8 +39,9 @@
             background-image: url("https://villaflorescollege.s3.us-west-2.amazonaws.com/SCHOOL_BACKDROP.jpg");
             background-size: cover;
             background-position: center;
-            opacity: 0.3;
+            opacity: 0.1;
             z-index: -1;
+            animation: fadeIn 1s ease-in;
         }
         
         .container {
@@ -53,52 +57,62 @@
         }
         
         .logo {
-            max-width: 300px;
-            margin-bottom: 2rem;
+            max-width: 250px;
+            margin-bottom: 1.5rem;
+            animation: slideIn 0.8s ease-out;
         }
         
         h1 {
-            font-size: 2.5rem;
+            font-size: 3rem;
+            font-weight: 700;
             margin-bottom: 1rem;
-            color: #2c3e50;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            animation: fadeInUp 0.8s ease-out;
         }
         
         p {
             font-size: 1.2rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             max-width: 600px;
             line-height: 1.6;
+            animation: fadeInUp 1s ease-out 0.2s;
+            animation-fill-mode: backwards;
         }
         
         .coming-soon {
-            font-weight: bold;
+            font-weight: 600;
             color: #e74c3c;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
+            margin-bottom: 2rem;
         }
         
         .contact, .login-btn {
-            margin-top: 1rem;
-            padding: 1rem 2rem;
-            background-color: #3498db;
+            padding: 0.8rem 2rem;
+            background: linear-gradient(45deg, #3498db, #2980b9);
             color: white;
             text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-            display: inline-block;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 0.5rem;
+            display: inline-flex;
+            align-items: center;
         }
         
         .contact:hover, .login-btn:hover {
-            background-color: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
         
         footer {
             text-align: center;
             padding: 1rem;
-            background-color: #2c3e50;
+            background: rgba(44, 62, 80, 0.9);
+            backdrop-filter: blur(10px);
             color: white;
+            font-size: 0.9rem;
         }
-
+        
         .modal {
             display: none;
             position: fixed;
@@ -106,111 +120,162 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            animation: fadeIn 0.5s ease-in;
         }
-
+        
         .modal-content {
-            background-color: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             padding: 2rem;
-            border-radius: 10px;
+            border-radius: 15px;
             max-width: 400px;
             width: 90%;
-            text-align: left;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             position: relative;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            animation: slideInUp 0.5s ease-out;
         }
-
+        
         .modal-content h2 {
             margin-bottom: 1.5rem;
             color: #2c3e50;
             text-align: center;
+            font-weight: 600;
         }
-
+        
         .modal-content label {
             display: block;
             margin-bottom: 0.5rem;
-            font-weight: bold;
-            color: #333;
+            font-weight: 600;
+            color: #2c3e50;
         }
-
+        
         .modal-content input {
             width: 100%;
             padding: 0.8rem;
             margin-bottom: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
             font-size: 1rem;
+            transition: border-color 0.3s;
         }
-
+        
+        .modal-content input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+        
         .modal-content input.error {
             border-color: #e74c3c;
         }
-
-        .modal-content .error-message {
+        
+        .error-message {
             color: #e74c3c;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             margin-bottom: 1rem;
             display: none;
         }
-
-        .modal-content .password-container {
+        
+        .password-container {
             position: relative;
         }
-
-        .modal-content .toggle-password {
+        
+        .toggle-password {
             position: absolute;
             right: 10px;
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #3498db;
+            transition: color 0.3s;
         }
-
+        
+        .toggle-password:hover {
+            color: #2980b9;
+        }
+        
         .modal-content button {
             width: 100%;
-            padding: 1rem;
-            background-color: #3498db;
+            padding: 0.8rem;
+            background: linear-gradient(45deg, #3498db, #2980b9);
             color: white;
             border: none;
-            border-radius: 5px;
-            font-weight: bold;
+            border-radius: 8px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
-
+        
         .modal-content button:hover {
-            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
-
+        
         .modal-content button:disabled {
-            background-color: #7f8c8d;
+            background: #7f8c8d;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
-
+        
         .forgot-password {
             display: block;
             text-align: center;
             margin-top: 1rem;
             color: #3498db;
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            transition: color 0.3s;
         }
-
+        
         .forgot-password:hover {
+            color: #2980b9;
             text-decoration: underline;
         }
-
+        
         .close {
             position: absolute;
             top: 10px;
             right: 15px;
             font-size: 1.5rem;
-            color: #333;
+            color: #2c3e50;
             cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close:hover {
+            color: #e74c3c;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideInUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .logo { max-width: 200px; }
+            .modal-content { width: 95%; }
         }
     </style>
 </head>
@@ -219,25 +284,27 @@
     
     <div class="container">
         <img src="https://villaflorescollege.s3.us-west-2.amazonaws.com/SCHOOL_LOGO.png" alt="Villaflores College Logo" class="logo">
-        <h1>Welcome to Villaflores College</h1>
-        <p>We are currently working on our new website to serve you better. Please check back soon for updates and information about our programs and services.</p>
+        <h1>Welcome to Grade 10 Hub</h1>
+        <p>Join your classmates in a vibrant space to collaborate, share resources, and stay connected. Our new platform is coming soon with exciting features for you!</p>
         <p class="coming-soon">Website Under Construction</p>
-        <a href="mailto:info@villaflorescollege.edu.ph" class="contact">Contact Us</a>
-        <a href="#" class="login-btn" onclick="openModal()">Login</a>
+        <div>
+            <a href="mailto:info@villaflorescollege.edu.ph" class="contact">Contact Us</a>
+            <a href="#" class="login-btn" onclick="openModal()">Login to Chat</a>
+        </div>
     </div>
     
-    <div id="loginModal" class="modal">
+    <div id="loginModal" class="modal" role="dialog" aria-labelledby="loginModalLabel">
         <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>Login to Your Account</h2>
+            <span class="close" aria-label="Close" onclick="closeModal()">&times;</span>
+            <h2 id="loginModalLabel">Login to Grade 10 Hub</h2>
             <form id="loginForm">
                 <label for="username">Username or Email</label>
-                <input type="text" id="username" name="username" required>
+                <input type="text" id="username" name="username" required aria-describedby="username-error">
                 <div class="error-message" id="username-error">Please enter a username or email.</div>
                 
                 <label for="password">Password</label>
                 <div class="password-container">
-                    <input type="password" id="password" name="password" required>
+                    <input type="password" id="password" name="password" required aria-describedby="password-error">
                     <span class="toggle-password" onclick="togglePassword()">Show</span>
                 </div>
                 <div class="error-message" id="password-error">Please enter a password.</div>
@@ -255,7 +322,8 @@
 
     <script>
         function openModal() {
-            document.getElementById('loginModal').style.display = 'flex';
+            const modal = document.getElementById('loginModal');
+            modal.style.display = 'flex';
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
             document.getElementById('username-error').style.display = 'none';
@@ -265,6 +333,7 @@
             document.getElementById('password').classList.remove('error');
             document.getElementById('loginButton').disabled = false;
             document.getElementById('loginButton').textContent = 'Login';
+            document.getElementById('username').focus();
         }
 
         function closeModal() {
@@ -349,9 +418,15 @@
         window.onclick = function(event) {
             const modal = document.getElementById('loginModal');
             if (event.target === modal) {
-                modal.style.display = 'none';
+                closeModal();
             }
         }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
     </script>
 </body>
 </html>
