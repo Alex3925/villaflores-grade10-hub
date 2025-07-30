@@ -21,7 +21,7 @@ const users = [
 
 const messages = [];
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
+const JWT_SECRET = process.env.JWT_SECRET || '=3f9aG7bXzKpQwRtYcL2mN8vJ4hDxS5uW6tEyH1oPqZ0=';
 
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
