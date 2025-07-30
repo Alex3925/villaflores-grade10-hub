@@ -21,7 +21,7 @@ const users = [
 
 const messages = [];
 
-const JWT_SECRET = process.env.JWT_SECRET || '=3f9aG7bXzKpQwRtYcL2mN8vJ4hDxS5uW6tEyH1oPqZ0=';
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
@@ -81,6 +81,34 @@ io.on('connection', (socket) => {
                 io.emit('updateMessages', messages.slice(-10));
             }
         }
+    });
+
+    socket.on('offer', (data) => {
+        io.to(data.target).emit('offer', {
+            offer: data.offer,
+            sender: socket.user.username,
+            target: data.target
+        });
+    });
+
+    socket.on('answer', (data) => {
+        io.to(data.target).emit('answer', {
+            answer: data.answer,
+            target: data.target
+        });
+    });
+
+    socket.on('ice-candidate', (data) => {
+        io.to(data.target).emit('ice-candidate', {
+            candidate: data.candidate,
+            target: data.target
+        });
+    });
+
+    socket.on('end-call', (data) => {
+        io.to(data.target).emit('end-call', {
+            target: data.target
+        });
     });
 
     socket.on('disconnect', () => {
