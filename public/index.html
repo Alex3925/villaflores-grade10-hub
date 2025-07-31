@@ -14,6 +14,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #8e44ad;
+            --accent: #e74c3c;
+            --dark: #2c3e50;
+            --light: #f9f9f9;
+            --text: #333;
+            --bg-light: #f5f5f5;
+            --bg-dark: #1a1a2e;
+        }
+
+        [data-theme="dark"] {
+            --bg-light: var(--bg-dark);
+            --text: #ecf0f1;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -25,8 +41,8 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            background: linear-gradient(135deg, #3498db, #8e44ad);
-            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--text);
             overflow-x: hidden;
         }
         
@@ -81,20 +97,26 @@
         
         .coming-soon {
             font-weight: 600;
-            color: #e74c3c;
+            color: var(--accent);
             font-size: 1.4rem;
             margin-bottom: 2rem;
         }
         
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
         .contact, .login-btn {
             padding: 0.8rem 2rem;
-            background: linear-gradient(45deg, #3498db, #2980b9);
+            background: linear-gradient(45deg, var(--primary), #2980b9);
             color: white;
             text-decoration: none;
             border-radius: 25px;
             font-weight: 600;
             transition: transform 0.3s, box-shadow 0.3s;
-            margin: 0.5rem;
             display: inline-flex;
             align-items: center;
         }
@@ -102,6 +124,22 @@
         .contact:hover, .login-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .theme-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.3s;
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.2);
         }
         
         footer {
@@ -141,7 +179,7 @@
         
         .modal-content h2 {
             margin-bottom: 1.5rem;
-            color: #2c3e50;
+            color: var(--dark);
             text-align: center;
             font-weight: 600;
         }
@@ -150,7 +188,7 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
-            color: #2c3e50;
+            color: var(--dark);
         }
         
         .modal-content input {
@@ -164,17 +202,17 @@
         }
         
         .modal-content input:focus {
-            border-color: #3498db;
+            border-color: var(--primary);
             outline: none;
             box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
         }
         
         .modal-content input.error {
-            border-color: #e74c3c;
+            border-color: var(--accent);
         }
         
         .error-message {
-            color: #e74c3c;
+            color: var(--accent);
             font-size: 0.85rem;
             margin-bottom: 1rem;
             display: none;
@@ -191,7 +229,7 @@
             transform: translateY(-50%);
             cursor: pointer;
             font-size: 0.85rem;
-            color: #3498db;
+            color: var(--primary);
             transition: color 0.3s;
         }
         
@@ -202,7 +240,7 @@
         .modal-content button {
             width: 100%;
             padding: 0.8rem;
-            background: linear-gradient(45deg, #3498db, #2980b9);
+            background: linear-gradient(45deg, var(--primary), #2980b9);
             color: white;
             border: none;
             border-radius: 8px;
@@ -227,7 +265,7 @@
             display: block;
             text-align: center;
             margin-top: 1rem;
-            color: #3498db;
+            color: var(--primary);
             text-decoration: none;
             font-size: 0.85rem;
             transition: color 0.3s;
@@ -243,13 +281,13 @@
             top: 10px;
             right: 15px;
             font-size: 1.5rem;
-            color: #2c3e50;
+            color: var(--dark);
             cursor: pointer;
             transition: color 0.3s;
         }
         
         .close:hover {
-            color: #e74c3c;
+            color: var(--accent);
         }
         
         @keyframes fadeIn {
@@ -276,10 +314,14 @@
             h1 { font-size: 2rem; }
             .logo { max-width: 200px; }
             .modal-content { width: 95%; }
+            .action-buttons { flex-direction: column; }
+            .contact, .login-btn { width: 100%; text-align: center; }
+            .theme-toggle { top: 0.5rem; right: 0.5rem; }
         }
     </style>
 </head>
-<body>
+<body data-theme="light">
+    <button class="theme-toggle" aria-label="Toggle theme" onclick="toggleTheme()">🌙</button>
     <div class="backdrop"></div>
     
     <div class="container">
@@ -287,7 +329,7 @@
         <h1>Welcome to Grade 10 Hub</h1>
         <p>Join your classmates in a vibrant space to collaborate, share resources, and stay connected. Our new platform is coming soon with exciting features for you!</p>
         <p class="coming-soon">Website Under Construction</p>
-        <div>
+        <div class="action-buttons">
             <a href="mailto:info@villaflorescollege.edu.ph" class="contact">Contact Us</a>
             <a href="#" class="login-btn" onclick="openModal()">Login to Chat</a>
         </div>
@@ -321,6 +363,19 @@
     </footer>
 
     <script>
+        function toggleTheme() {
+            const body = document.body;
+            const theme = body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            document.querySelector('.theme-toggle').textContent = theme === 'light' ? '🌙' : '☀️';
+        }
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            document.querySelector('.theme-toggle').textContent = '☀️';
+        }
+
         function openModal() {
             const modal = document.getElementById('loginModal');
             modal.style.display = 'flex';
