@@ -11,103 +11,363 @@
     <link rel="apple-touch-icon" sizes="180x180" href="https://villaflorescollege.s3.us-west-2.amazonaws.com/favicons/apple-touch-icon.png">
     <link rel="manifest" href="https://villaflorescollege.s3.us-west-2.amazonaws.com/favicons/site.webmanifest">
     
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&family=Roboto:wght@300;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #00d4ff;
-            --secondary: #ff007a;
-            --accent: #ffaa00;
-            --dark: #0a0f1a;
-            --light: #f0f4f8;
-            --glow: rgba(0, 212, 255, 0.7);
+            --primary: #4CAF50; /* Forest green */
+            --secondary: #8BC34A; /* Light green */
+            --accent: #FF5722; /* Warm orange */
+            --dark: #2E7D32; /* Dark green */
+            --light: #E8F5E9; /* Pale green */
+            --text: #1B5E20; /* Deep green */
+            --bg-light: #FFFFFF;
+            --bg-dark: #C8E6C9;
         }
+
         [data-theme="dark"] {
-            --light: #0a0f1a;
-            --dark: #f0f4f8;
+            --bg-light: var(--bg-dark);
+            --text: var(--light);
+            --dark: #A5D6A7;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Quicksand', sans-serif;
+        }
+        
         body {
-            min-height: 100vh; display: flex; flex-direction: column;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: var(--dark); overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, var(--light), var(--secondary));
+            color: var(--text);
+            overflow-x: hidden;
         }
-        .particles {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 0;
+        
+        .backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("https://villaflorescollege.s3.us-west-2.amazonaws.com/SCHOOL_BACKDROP.jpg");
+            background-size: cover;
+            background-position: center;
+            opacity: 0.05;
+            z-index: -1;
+            clip-path: ellipse(70% 60% at 50% 30%);
+            animation: fadeIn 1s ease-in;
         }
+        
         .container {
-            max-width: 1200px; margin: 0 auto; padding: 2rem;
-            text-align: center; flex: 1; position: relative; z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 1;
         }
+        
         .logo {
-            max-width: 300px; filter: drop-shadow(0 0 10px var(--glow));
-            animation: pulse 2s infinite alternate;
+            max-width: 280px;
+            margin-bottom: 2rem;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
         }
+        
+        .logo:hover {
+            transform: rotate(5deg) scale(1.05);
+        }
+        
         h1 {
-            font-family: 'Orbitron', sans-serif; font-size: 3.5rem; font-weight: 700;
-            margin: 1.5rem 0; text-shadow: 0 0 15px var(--glow);
-            animation: fadeIn 1.5s ease-out;
+            font-size: 3.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark);
+            text-shadow: 1px 1px 3px rgba(27, 94, 32, 0.3);
+            animation: slideInUp 0.8s ease-out;
         }
-        .countdown {
-            font-size: 1.5rem; margin: 1rem 0; color: var(--accent);
-            animation: bounce 1.5s infinite;
+        
+        p {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 300;
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            max-width: 650px;
+            line-height: 1.8;
+            color: var(--text);
+            animation: fadeIn 1s ease-out 0.2s;
+            animation-fill-mode: backwards;
         }
-        p { font-size: 1.2rem; max-width: 600px; margin: 0 auto 2rem; line-height: 1.6; }
-        .action-buttons { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+        
+        .coming-soon {
+            font-weight: 500;
+            color: var(--accent);
+            font-size: 1.5rem;
+            margin-bottom: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
         .contact, .login-btn {
-            padding: 1rem 2.5rem; background: var(--primary);
-            color: var(--light); text-decoration: none; border-radius: 25px;
-            font-weight: 600; transition: transform 0.3s, box-shadow 0.3s;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 1rem 2.5rem;
+            background: var(--primary);
+            color: var(--light);
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 6px 12px rgba(76, 175, 80, 0.2);
         }
+        
         .contact:hover, .login-btn:hover {
-            transform: translateY(-5px); box-shadow: 0 8px 20px var(--glow);
+            background: var(--dark);
+            color: var(--light);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(46, 125, 50, 0.3);
+            border-color: var(--accent);
         }
+        
         .theme-toggle {
-            position: absolute; top: 1rem; right: 1rem;
-            background: var(--primary); color: var(--light);
-            border: none; border-radius: 50%; width: 40px; height: 40px;
-            font-size: 1.2rem; cursor: pointer; transition: transform 0.3s;
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: transform 0.3s, background 0.3s;
         }
-        .theme-toggle:hover { transform: scale(1.2); }
+        
+        .theme-toggle:hover {
+            transform: scale(1.15);
+            background: var(--accent);
+        }
+        
         footer {
-            text-align: center; padding: 1rem; background: rgba(10, 15, 26, 0.9);
-            backdrop-filter: blur(10px); color: var(--light); font-size: 0.9rem;
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--dark);
+            color: var(--light);
+            font-size: 1rem;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
         }
-        @keyframes pulse { to { transform: scale(1.05); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .modal-content {
+            background: var(--bg-light);
+            padding: 2.5rem;
+            border-radius: 20px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: slideInUp 0.5s ease-out;
+            border: 2px solid var(--secondary);
+        }
+        
+        .modal-content h2 {
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.8rem;
+        }
+        
+        .modal-content label {
+            display: block;
+            margin-bottom: 0.6rem;
+            font-weight: 500;
+            color: var(--text);
+            text-align: left;
+        }
+        
+        .modal-content input {
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1.2rem;
+            border: 2px solid var(--secondary);
+            border-radius: 10px;
+            font-size: 1.1rem;
+            background: var(--light);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .modal-content input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
+            outline: none;
+        }
+        
+        .modal-content input.error {
+            border-color: var(--accent);
+        }
+        
+        .error-message {
+            color: var(--accent);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: none;
+            text-align: left;
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--dark);
+            transition: color 0.3s;
+        }
+        
+        .toggle-password:hover {
+            color: var(--accent);
+        }
+        
+        .modal-content button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+        
+        .modal-content button:hover {
+            background: var(--dark);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(46, 125, 50, 0.3);
+        }
+        
+        .modal-content button:disabled {
+            background: #B0B3B8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .forgot-password {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--dark);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+        
+        .forgot-password:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+        
+        .close {
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            font-size: 1.6rem;
+            color: var(--text);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close:hover {
+            color: var(--accent);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideInUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
         @media (max-width: 600px) {
-            h1 { font-size: 2.5rem; }
+            h1 { font-size: 2.2rem; }
             .logo { max-width: 200px; }
+            .modal-content { width: 95%; padding: 1.5rem; }
             .action-buttons { flex-direction: column; }
             .contact, .login-btn { width: 100%; }
+            .theme-toggle { top: 1rem; right: 1rem; }
         }
     </style>
 </head>
 <body data-theme="light">
-    <canvas class="particles"></canvas>
     <button class="theme-toggle" aria-label="Toggle theme" onclick="toggleTheme()">🌙</button>
+    <div class="backdrop"></div>
+    
     <div class="container">
         <img src="https://villaflorescollege.s3.us-west-2.amazonaws.com/SCHOOL_LOGO.png" alt="Villaflores College Logo" class="logo">
         <h1>Welcome to Grade 10 Hub</h1>
-        <div class="countdown" id="countdown">Launching in: 7 days, 12 hours, 3 minutes</div>
-        <p>Step into a vibrant space to collaborate, share resources, and connect with classmates. Experience a cutting-edge platform designed just for you!</p>
+        <p>Join your classmates in a vibrant space to collaborate, share resources, and stay connected. Our new platform is coming soon with exciting features for you!</p>
+        <p class="coming-soon">Website Under Construction</p>
         <div class="action-buttons">
             <a href="mailto:info@villaflorescollege.edu.ph" class="contact">Contact Us</a>
-            <a href="#" class="login-btn" onclick="openModal()">Enter the Hub</a>
+            <a href="#" class="login-btn" onclick="openModal()">Login to Chat</a>
         </div>
     </div>
-    <footer>&copy; 2025 Villaflores College. All Rights Reserved.</footer>
-
+    
     <div id="loginModal" class="modal" role="dialog" aria-labelledby="loginModalLabel">
         <div class="modal-content">
             <span class="close" aria-label="Close" onclick="closeModal()">&times;</span>
-            <h2 id="loginModalLabel">Enter Grade 10 Hub</h2>
+            <h2 id="loginModalLabel">Login to Grade 10 Hub</h2>
             <form id="loginForm">
                 <label for="username">Username or Email</label>
                 <input type="text" id="username" name="username" required aria-describedby="username-error">
                 <div class="error-message" id="username-error">Please enter a username or email.</div>
+                
                 <label for="password">Password</label>
                 <div class="password-container">
                     <input type="password" id="password" name="password" required aria-describedby="password-error">
@@ -115,19 +375,18 @@
                 </div>
                 <div class="error-message" id="password-error">Please enter a password.</div>
                 <div class="error-message" id="server-error"></div>
-                <button type="submit" id="loginButton">Enter</button>
-                <a href="mailto:alexusa010101@gmail.com?subject=Forgot%20Password" class="forgot-password">Forgot Password?</a>
+                
+                <button type="submit" id="loginButton">Login</button>
+                <a href="mailto:info@villaflorescollege.edu.ph?subject=Forgot%20Password" class="forgot-password">Forgot Password?</a>
             </form>
         </div>
     </div>
+    
+    <footer>
+        &copy; 2025 Villaflores College. All Rights Reserved.
+    </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
     <script>
-        particlesJS('particles', {
-            particles: { number: { value: 80 }, color: { value: '#00d4ff' }, shape: { type: 'circle' }, opacity: { value: 0.5 }, size: { value: 3 }, move: { speed: 2 } },
-            interactivity: { detectsOn: 'canvas', modes: { repulse: { distance: 100 } } }
-        });
-
         function toggleTheme() {
             const body = document.body;
             const theme = body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
@@ -141,12 +400,40 @@
             document.querySelector('.theme-toggle').textContent = '☀️';
         }
 
-        function openModal() { /* [Previous modal logic remains unchanged] */ }
-        function closeModal() { /* [Previous modal logic remains unchanged] */ }
-        function togglePassword() { /* [Previous modal logic remains unchanged] */ }
+        function openModal() {
+            const modal = document.getElementById('loginModal');
+            modal.style.display = 'flex';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('username-error').style.display = 'none';
+            document.getElementById('password-error').style.display = 'none';
+            document.getElementById('server-error').style.display = 'none';
+            document.getElementById('username').classList.remove('error');
+            document.getElementById('password').classList.remove('error');
+            document.getElementById('loginButton').disabled = false;
+            document.getElementById('loginButton').textContent = 'Login';
+            document.getElementById('username').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleText = document.querySelector('.toggle-password');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleText.textContent = 'Hide';
+            } else {
+                passwordInput.type = 'password';
+                toggleText.textContent = 'Show';
+            }
+        }
 
         document.getElementById('loginForm').addEventListener('submit', async function(event) {
             event.preventDefault();
+
             let valid = true;
             const username = document.getElementById('username');
             const password = document.getElementById('password');
@@ -175,19 +462,24 @@
             if (!valid) return;
 
             loginButton.disabled = true;
-            loginButton.textContent = 'Entering...';
+            loginButton.textContent = 'Logging in...';
 
             try {
                 const response = await fetch('/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: username.value.trim(), password: password.value.trim() })
+                    body: JSON.stringify({
+                        username: username.value.trim(),
+                        password: password.value.trim()
+                    })
                 });
+
                 const data = await response.json();
 
                 if (response.ok) {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('username', data.username);
+                    console.log('Token stored:', localStorage.getItem('token')); // Debug
                     closeModal();
                     window.location.href = '/chat.html';
                 } else {
@@ -200,26 +492,22 @@
                 serverError.style.display = 'block';
             } finally {
                 loginButton.disabled = false;
-                loginButton.textContent = 'Enter';
+                loginButton.textContent = 'Login';
             }
         });
 
-        window.onclick = function(event) { /* [Previous modal logic remains unchanged] */ }
-        document.addEventListener('keydown', (event) => { /* [Previous modal logic remains unchanged] */ });
-
-        // Countdown Timer (example: 7 days from now)
-        function updateCountdown() {
-            const launchDate = new Date();
-            launchDate.setDate(launchDate.getDate() + 7);
-            const now = new Date();
-            const diff = launchDate - now;
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            document.getElementById('countdown').textContent = `Launching in: ${days} days, ${hours} hours, ${minutes} minutes`;
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginModal');
+            if (event.target === modal) {
+                closeModal();
+            }
         }
-        setInterval(updateCountdown, 60000);
-        updateCountdown();
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
     </script>
 </body>
 </html>
