@@ -13,8 +13,26 @@
     
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #8e44ad;
+            --accent: #e74c3c;
+            --dark: #2c3e50;
+            --light: #f9f9f9;
+            --text: #333;
+            --bg-light: #f5f5f5;
+            --bg-dark: #1a1a2e;
+        }
+
+        [data-theme="dark"] {
+            --bg-light: var(--bg-dark);
+            --text: #ecf0f1;
+            --light: #2c3e50;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -26,8 +44,8 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            background: linear-gradient(135deg, #3498db, #8e44ad);
-            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--text);
         }
         
         .backdrop {
@@ -83,7 +101,7 @@
         }
         
         .chat-header {
-            background: linear-gradient(45deg, #3498db, #2980b9);
+            background: linear-gradient(45deg, var(--primary), #2980b9);
             color: white;
             padding: 1rem;
             border-top-left-radius: 15px;
@@ -115,11 +133,12 @@
             padding: 0.5rem 1rem;
             background: rgba(255, 255, 255, 0.95);
             border-bottom: 1px solid #ddd;
+            flex-wrap: wrap;
         }
         
         .chat-controls button {
             padding: 0.5rem 1rem;
-            background: linear-gradient(45deg, #3498db, #2980b9);
+            background: linear-gradient(45deg, var(--primary), #2980b9);
             color: white;
             border: none;
             border-radius: 8px;
@@ -140,11 +159,26 @@
             box-shadow: none;
         }
         
+        .user-presence {
+            padding: 0.5rem 1rem;
+            background: var(--light);
+            font-size: 0.9rem;
+            color: var(--text);
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .typing-indicator {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            display: none;
+        }
+        
         .chat-messages {
             flex: 1;
             padding: 1.5rem;
             overflow-y: auto;
-            background: #f9f9f9;
+            background: var(--bg-light);
             scroll-behavior: smooth;
         }
         
@@ -158,7 +192,7 @@
         }
         
         .message.sent {
-            background: linear-gradient(45deg, #3498db, #2980b9);
+            background: linear-gradient(45deg, var(--primary), #2980b9);
             color: white;
             margin-left: auto;
             border-bottom-right-radius: 5px;
@@ -166,7 +200,7 @@
         
         .message.received {
             background: #ecf0f1;
-            color: #333;
+            color: var(--text);
             border-bottom-left-radius: 5px;
         }
         
@@ -189,7 +223,7 @@
         }
         
         .message-file a {
-            color: #3498db;
+            color: var(--primary);
             text-decoration: none;
             font-size: 0.85rem;
             transition: color 0.3s;
@@ -202,7 +236,7 @@
         
         .delete-btn {
             margin-left: 0.5rem;
-            color: #e74c3c;
+            color: var(--accent);
             cursor: pointer;
             font-size: 0.8rem;
             transition: color 0.3s;
@@ -212,6 +246,22 @@
             color: #c0392b;
         }
         
+        .message-reactions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.3rem;
+            font-size: 0.9rem;
+        }
+        
+        .reaction-btn {
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .reaction-btn:hover {
+            transform: scale(1.2);
+        }
+        
         .chat-input {
             display: flex;
             padding: 1rem;
@@ -219,6 +269,33 @@
             background: rgba(255, 255, 255, 0.95);
             border-bottom-left-radius: 15px;
             border-bottom-right-radius: 15px;
+            position: relative;
+        }
+        
+        .emoji-picker {
+            display: none;
+            position: absolute;
+            bottom: 4rem;
+            left: 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+        
+        .emoji-picker button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin: 0.2rem;
+            transition: transform 0.3s;
+        }
+        
+        .emoji-picker button:hover {
+            transform: scale(1.2);
         }
         
         .chat-input input[type="text"] {
@@ -232,7 +309,7 @@
         }
         
         .chat-input input[type="text"]:focus {
-            border-color: #3498db;
+            border-color: var(--primary);
             outline: none;
             box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
         }
@@ -243,8 +320,8 @@
         }
         
         .chat-input button {
-            padding: 0.8rem 1.5rem;
-            background: linear-gradient(45deg, #3498db, #2980b9);
+            padding: 0.8rem 1rem;
+            background: linear-gradient(45deg, var(--primary), #2980b9);
             color: white;
             border: none;
             border-radius: 8px;
@@ -281,6 +358,10 @@
             width: 90%;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
         }
         
         .video-call-content video {
@@ -296,11 +377,12 @@
             justify-content: center;
             gap: 1rem;
             margin-top: 1rem;
+            width: 100%;
         }
         
         .video-call-controls button {
             padding: 0.8rem 1.5rem;
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            background: linear-gradient(45deg, var(--accent), #c0392b);
             color: white;
             border: none;
             border-radius: 8px;
@@ -348,11 +430,19 @@
             .logo { max-width: 120px; }
             .chat-container { height: 500px; }
             .message { max-width: 85%; }
+            .video-call-content { flex-direction: column; }
             .video-call-content video { max-width: 100%; }
+            .chat-controls { flex-direction: column; }
+            .chat-controls button { width: 100%; }
+            .chat-input { flex-wrap: wrap; }
+            .chat-input input[type="text"] { margin-bottom: 0.5rem; }
+            .chat-input input[type="file"] { margin-bottom: 0.5rem; }
+            .chat-input button { width: 100%; }
         }
     </style>
 </head>
-<body>
+<body data-theme="light">
+    <button class="theme-toggle" aria-label="Toggle theme" onclick="toggleTheme()">🌙</button>
     <div class="backdrop"></div>
     
     <div class="container">
@@ -363,12 +453,22 @@
                 <span>Welcome, <span id="username"></span></span>
                 <a href="/index.html" aria-label="Logout">Logout</a>
             </div>
+            <div class="user-presence" id="userPresence">Online: <span id="onlineUsers"></span></div>
             <div class="chat-controls">
                 <button id="startVoiceCall" aria-label="Start voice call">Voice Call</button>
                 <button id="startVideoCall" aria-label="Start video call">Video Call</button>
             </div>
+            <div class="typing-indicator" id="typingIndicator"></div>
             <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
             <form class="chat-input" id="chatForm">
+                <button type="button" id="emojiBtn" aria-label="Open emoji picker">😊</button>
+                <div class="emoji-picker" id="emojiPicker">
+                    <button onclick="addEmoji('😊')">😊</button>
+                    <button onclick="addEmoji('👍')">👍</button>
+                    <button onclick="addEmoji('❤️')">❤️</button>
+                    <button onclick="addEmoji('😂')">😂</button>
+                    <button onclick="addEmoji('🎉')">🎉</button>
+                </div>
                 <input type="text" id="messageInput" placeholder="Type your message..." required aria-label="Message input">
                 <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.jpg,.png" aria-label="Upload file">
                 <button type="submit" aria-label="Send message">Send</button>
@@ -406,22 +506,46 @@
         const chatForm = document.getElementById('chatForm');
         const messageInput = document.getElementById('messageInput');
         const fileInput = document.getElementById('fileInput');
+        const emojiBtn = document.getElementById('emojiBtn');
+        const emojiPicker = document.getElementById('emojiPicker');
         const startVoiceCallBtn = document.getElementById('startVoiceCall');
         const startVideoCallBtn = document.getElementById('startVideoCall');
         const videoCallModal = document.getElementById('videoCallModal');
         const localVideo = document.getElementById('localVideo');
         const remoteVideo = document.getElementById('remoteVideo');
         const endCallBtn = document.getElementById('endCall');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const onlineUsers = document.getElementById('onlineUsers');
 
         let localStream = null;
         let peerConnection = null;
         let targetUser = null;
+        let isTyping = false;
 
         const configuration = {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' }
             ]
         };
+
+        function toggleTheme() {
+            const body = document.body;
+            const theme = body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            document.querySelector('.theme-toggle').textContent = theme === 'light' ? '🌙' : '☀️';
+        }
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            document.querySelector('.theme-toggle').textContent = '☀️';
+        }
+
+        function addEmoji(emoji) {
+            messageInput.value += emoji;
+            emojiPicker.style.display = 'none';
+            messageInput.focus();
+        }
 
         function displayMessage(message) {
             const div = document.createElement('div');
@@ -435,6 +559,13 @@
                 </div>
                 <div>${message.text}</div>
                 ${message.file ? `<div class="message-file"><a href="${message.file}" target="_blank" aria-label="View uploaded file">View File</a></div>` : ''}
+                <div class="message-reactions">
+                    ${message.reactions ? Object.entries(message.reactions).map(([emoji, users]) => 
+                        `<span class="reaction-btn" onclick="addReaction(${message.id}, '${emoji}')" aria-label="React with ${emoji}">${emoji} ${users.length}</span>`
+                    ).join('') : ''}
+                    <span class="reaction-btn" onclick="addReaction(${message.id}, '👍')" aria-label="React with thumbs up">👍</span>
+                    <span class="reaction-btn" onclick="addReaction(${message.id}, '❤️')" aria-label="React with heart">❤️</span>
+                </div>
                 <div class="message-timestamp">${new Date(message.timestamp).toLocaleString()}</div>
             `;
             chatMessages.appendChild(div);
@@ -455,6 +586,30 @@
             messages.forEach(displayMessage);
         });
 
+        socket.on('typing', (data) => {
+            if (data.username !== username) {
+                typingIndicator.textContent = `${data.username} is typing...`;
+                typingIndicator.style.display = 'block';
+                setTimeout(() => {
+                    typingIndicator.style.display = 'none';
+                }, 3000);
+            }
+        });
+
+        socket.on('userPresence', (users) => {
+            onlineUsers.textContent = users.join(', ');
+        });
+
+        socket.on('reactionUpdate', (message) => {
+            const existingMessage = Array.from(chatMessages.children).find(
+                div => parseInt(div.querySelector('.delete-btn')?.getAttribute('onclick')?.match(/\d+/)) === message.id
+            );
+            if (existingMessage) {
+                existingMessage.remove();
+                displayMessage(message);
+            }
+        });
+
         chatForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const text = messageInput.value.trim();
@@ -469,10 +624,37 @@
             messageInput.value = '';
             fileInput.value = '';
             messageInput.focus();
+            socket.emit('typing', { username, isTyping: false });
+        });
+
+        messageInput.addEventListener('input', () => {
+            if (!isTyping) {
+                isTyping = true;
+                socket.emit('typing', { username, isTyping: true });
+            }
+            clearTimeout(messageInput.typingTimeout);
+            messageInput.typingTimeout = setTimeout(() => {
+                isTyping = false;
+                socket.emit('typing', { username, isTyping: false });
+            }, 3000);
+        });
+
+        emojiBtn.addEventListener('click', () => {
+            emojiPicker.style.display = emojiPicker.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!emojiPicker.contains(event.target) && event.target !== emojiBtn) {
+                emojiPicker.style.display = 'none';
+            }
         });
 
         function deleteMessage(messageId) {
             socket.emit('deleteMessage', messageId);
+        }
+
+        function addReaction(messageId, emoji) {
+            socket.emit('addReaction', { messageId, emoji, username });
         }
 
         socket.on('connect_error', (error) => {
