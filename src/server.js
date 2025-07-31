@@ -20,9 +20,7 @@ const users = [
 ];
 
 const messages = [];
-const onlineUsers = new Set();
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
+const onlineUsers = new Map(); // Map username to socket ID
 
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
@@ -39,7 +37,7 @@ app.post('/login', (req, res) => {
         return res.status(401).json({ error: 'Invalid username or password' });
     }
 
-    const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ message: 'Login successful', token, username: user.username });
 });
 
@@ -49,7 +47,7 @@ io.use((socket, next) => {
         return next(new Error('Authentication error: No token provided'));
     }
     try {
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         socket.user = decoded;
         next();
     } catch (err) {
@@ -59,8 +57,11 @@ io.use((socket, next) => {
 
 io.on('connection', (socket) => {
     console.log(`User ${socket.user.username} connected`);
-    onlineUsers.add(socket.user.username);
-    io.emit('userPresence', Array.from(onlineUsers));
+    onlineUsers.set(socket.user.username, socket.id);
+    io.emit('userPresence', users.map(u => ({
+        username: u.username,
+        online: onlineUsers.has(u.username)
+    })));
 
     socket.emit('initialMessages', messages.slice(-10));
 
@@ -107,37 +108,50 @@ io.on('connection', (socket) => {
     });
 
     socket.on('offer', (data) => {
-        io.to(data.target).emit('offer', {
-            offer: data.offer,
-            sender: socket.user.username,
-            target: data.target
-        });
+        const targetSocketId = onlineUsers.get(data.target);
+        if (targetSocketId) {
+            io.to(targetSocketId).emit('offer', {
+                offer: data.offer,
+                sender: socket.user.username,
+                target: data.target
+            });
+        }
     });
 
     socket.on('answer', (data) => {
-        io.to(data.target).emit('answer', {
-            answer: data.answer,
-            target: data.target
-        });
+        const targetSocketId = onlineUsers.get(data.target);
+        if (targetSocketId) {
+            io.to(targetSocketId).emit('answer', {
+                answer: data.answer,
+                target: data.target
+            });
+        }
     });
 
     socket.on('ice-candidate', (data) => {
-        io.to(data.target).emit('ice-candidate', {
-            candidate: data.candidate,
-            target: data.target
-        });
+        const targetSocketId = onlineUsers.get(data.target);
+        if (targetSocketId) {
+            io.to(targetSocketId).emit('ice-candidate', {
+                candidate: data.candidate,
+                target: data.target
+            });
+        }
     });
 
     socket.on('end-call', (data) => {
-        io.to(data.target).emit('end-call', {
-            target: data.target
-        });
+        const targetSocketId = onlineUsers.get(data.target);
+        if (targetSocketId) {
+            io.to(targetSocketId).emit('end-call', { target: data.target });
+        }
     });
 
     socket.on('disconnect', () => {
         console.log(`User ${socket.user.username} disconnected`);
         onlineUsers.delete(socket.user.username);
-        io.emit('userPresence', Array.from(onlineUsers));
+        io.emit('userPresence', users.map(u => ({
+            username: u.username,
+            online: onlineUsers.has(u.username)
+        })));
     });
 });
 
