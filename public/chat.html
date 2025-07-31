@@ -17,19 +17,21 @@
     
     <style>
         :root {
-            --primary: #0084FF; /* Messenger blue */
-            --secondary: #E4E6EB; /* Light gray */
-            --dark: #1C2526; /* Dark mode background */
-            --text: #050505; /* Default text */
-            --bg-light: #FFFFFF; /* White background */
-            --bg-dark: #1C2526; /* Dark mode */
-            --bubble-sent: #0084FF; /* Sent message */
-            --bubble-received: #E4E6EB; /* Received message */
+            --primary: #0084FF;
+            --secondary: #E4E6EB;
+            --accent: #FF3B30;
+            --dark: #1C2526;
+            --light: #F5F6F5;
+            --text: #050505;
+            --bg-light: #FFFFFF;
+            --bg-dark: #1C2526;
+            --bubble-sent: #0084FF;
+            --bubble-received: #E4E6EB;
         }
 
         [data-theme="dark"] {
             --bg-light: var(--bg-dark);
-            --text: #F5F6F5;
+            --text: var(--light);
             --bubble-received: #2A3942;
         }
 
@@ -252,7 +254,7 @@
 
         .delete-btn {
             margin-left: 0.5rem;
-            color: #FF3B30;
+            color: var(--accent);
             cursor: pointer;
             font-size: 0.8rem;
         }
@@ -373,7 +375,7 @@
 
         .video-call-controls button {
             padding: 0.8rem;
-            background: #FF3B30;
+            background: var(--accent);
             color: white;
             border: none;
             border-radius: 50%;
@@ -476,13 +478,16 @@
 
     <script>
         const socket = io('https://your-app.onrender.com', {
-            auth: { token: localStorage.getItem('token') }
+            auth: { token: localStorage.getItem('token') },
+            transports: ['websocket', 'polling'], // Prefer WebSocket, fallback to polling
+            reconnectionAttempts: 5 // Retry connection
         });
 
         const username = localStorage.getItem('username') || 'User';
         document.getElementById('username').textContent = username;
 
         if (!localStorage.getItem('token')) {
+            console.warn('No token found, redirecting to login');
             window.location.href = '/index.html';
         }
 
@@ -581,6 +586,10 @@
             });
         }
 
+        socket.on('connect', () => {
+            console.log('Socket.IO connected successfully');
+        });
+
         socket.on('initialMessages', (messages) => {
             chatMessages.innerHTML = '';
             messages.forEach(displayMessage);
@@ -606,7 +615,7 @@
         });
 
         socket.on('userPresence', (users) => {
-            updateUserList(users.map(u => ({ username: u, online: true })));
+            updateUserList(users);
         });
 
         socket.on('reactionUpdate', (message) => {
@@ -617,6 +626,21 @@
                 existingMessage.remove();
                 displayMessage(message);
             }
+        });
+
+        socket.on('connect_error', (error) => {
+            console.error('Socket.IO connect error:', error.message);
+            alert('Connection failed: ' + error.message + '. Please try logging in again.');
+            // Do not redirect immediately, allow user to retry
+        });
+
+        socket.on('reconnect', (attempt) => {
+            console.log('Socket.IO reconnected after', attempt, 'attempts');
+        });
+
+        socket.on('reconnect_error', (error) => {
+            console.error('Socket.IO reconnect error:', error.message);
+            alert('Reconnection failed: ' + error.message);
         });
 
         chatForm.addEventListener('submit', async (event) => {
@@ -666,16 +690,10 @@
             socket.emit('addReaction', { messageId, emoji, username });
         }
 
-        socket.on('connect_error', (error) => {
-            alert('Connection error: ' + error.message);
-            localStorage.removeItem('token');
-            localStorage.removeItem('username');
-            window.location.href = '/index.html';
-        });
-
         document.querySelector('.chat-header a').addEventListener('click', () => {
             localStorage.removeItem('token');
             localStorage.removeItem('username');
+            socket.disconnect();
         });
 
         // WebRTC Call Logic
@@ -702,6 +720,7 @@
 
                 peerConnection.ontrack = (event) => {
                     remoteVideo.srcObject = event.streams[0];
+                    console.log('Received remote stream');
                 };
 
                 peerConnection.onicecandidate = (event) => {
@@ -718,6 +737,7 @@
                     if (peerConnection.iceConnectionState === 'disconnected' || 
                         peerConnection.iceConnectionState === 'failed') {
                         endCall();
+                        alert('Call disconnected.');
                     }
                 };
 
@@ -726,6 +746,7 @@
                         const offer = await peerConnection.createOffer();
                         await peerConnection.setLocalDescription(offer);
                         socket.emit('offer', { offer, target: targetUser, sender: username });
+                        console.log('Offer sent to', targetUser);
                     } catch (error) {
                         console.error('Negotiation error:', error);
                         alert('Failed to initiate call: ' + error.message);
@@ -804,6 +825,7 @@
 
                     peerConnection.ontrack = (event) => {
                         remoteVideo.srcObject = event.streams[0];
+                        console.log('Received remote stream');
                     };
 
                     peerConnection.onicecandidate = (event) => {
@@ -820,6 +842,7 @@
                         if (peerConnection.iceConnectionState === 'disconnected' || 
                             peerConnection.iceConnectionState === 'failed') {
                             endCall();
+                            alert('Call disconnected.');
                         }
                     };
 
@@ -827,6 +850,7 @@
                     const answer = await peerConnection.createAnswer();
                     await peerConnection.setLocalDescription(answer);
                     socket.emit('answer', { answer, target: data.sender });
+                    console.log('Answer sent to', data.sender);
                 } catch (error) {
                     console.error('Error handling offer:', error);
                     alert('Failed to accept call: ' + error.message);
@@ -839,6 +863,7 @@
             if (data.target === username) {
                 try {
                     await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+                    console.log('Answer received from', data.target);
                 } catch (error) {
                     console.error('Error handling answer:', error);
                     alert('Error accepting call: ' + error.message);
@@ -851,6 +876,7 @@
             if (data.target === username && peerConnection) {
                 try {
                     await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    console.log('ICE candidate added');
                 } catch (error) {
                     console.error('Error adding ICE candidate:', error);
                 }
