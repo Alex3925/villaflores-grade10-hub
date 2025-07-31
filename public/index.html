@@ -15,19 +15,19 @@
     
     <style>
         :root {
-            --primary: #3498db;
-            --secondary: #8e44ad;
-            --accent: #e74c3c;
-            --dark: #2c3e50;
-            --light: #f9f9f9;
-            --text: #333;
-            --bg-light: #f5f5f5;
-            --bg-dark: #1a1a2e;
+            --primary: #0084FF;
+            --secondary: #E4E6EB;
+            --accent: #FF3B30;
+            --dark: #1C2526;
+            --light: #F5F6F5;
+            --text: #050505;
+            --bg-light: #FFFFFF;
+            --bg-dark: #1C2526;
         }
 
         [data-theme="dark"] {
             --bg-light: var(--bg-dark);
-            --text: #ecf0f1;
+            --text: var(--light);
         }
 
         * {
@@ -41,7 +41,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, var(--primary), #3b5998);
             color: var(--text);
             overflow-x: hidden;
         }
@@ -111,7 +111,7 @@
         
         .contact, .login-btn {
             padding: 0.8rem 2rem;
-            background: linear-gradient(45deg, var(--primary), #2980b9);
+            background: var(--primary);
             color: white;
             text-decoration: none;
             border-radius: 25px;
@@ -130,11 +130,14 @@
             position: absolute;
             top: 1rem;
             right: 1rem;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
+            background: var(--primary);
             color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
             transition: transform 0.3s;
         }
         
@@ -145,7 +148,7 @@
         footer {
             text-align: center;
             padding: 1rem;
-            background: rgba(44, 62, 80, 0.9);
+            background: rgba(28, 37, 38, 0.9);
             backdrop-filter: blur(10px);
             color: white;
             font-size: 0.9rem;
@@ -166,8 +169,7 @@
         }
         
         .modal-content {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: var(--bg-light);
             padding: 2rem;
             border-radius: 15px;
             max-width: 400px;
@@ -179,7 +181,7 @@
         
         .modal-content h2 {
             margin-bottom: 1.5rem;
-            color: var(--dark);
+            color: var(--text);
             text-align: center;
             font-weight: 600;
         }
@@ -188,14 +190,14 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
-            color: var(--dark);
+            color: var(--text);
         }
         
         .modal-content input {
             width: 100%;
             padding: 0.8rem;
             margin-bottom: 1rem;
-            border: 1px solid #ddd;
+            border: 1px solid #E4E6EB;
             border-radius: 8px;
             font-size: 1rem;
             transition: border-color 0.3s;
@@ -204,7 +206,7 @@
         .modal-content input:focus {
             border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+            box-shadow: 0 0 5px rgba(0, 132, 255, 0.5);
         }
         
         .modal-content input.error {
@@ -234,13 +236,13 @@
         }
         
         .toggle-password:hover {
-            color: #2980b9;
+            color: #0066CC;
         }
         
         .modal-content button {
             width: 100%;
             padding: 0.8rem;
-            background: linear-gradient(45deg, var(--primary), #2980b9);
+            background: var(--primary);
             color: white;
             border: none;
             border-radius: 8px;
@@ -255,7 +257,7 @@
         }
         
         .modal-content button:disabled {
-            background: #7f8c8d;
+            background: #B0B3B8;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
@@ -272,7 +274,7 @@
         }
         
         .forgot-password:hover {
-            color: #2980b9;
+            color: #0066CC;
             text-decoration: underline;
         }
         
@@ -281,7 +283,7 @@
             top: 10px;
             right: 15px;
             font-size: 1.5rem;
-            color: var(--dark);
+            color: var(--text);
             cursor: pointer;
             transition: color 0.3s;
         }
@@ -455,14 +457,16 @@
                 if (response.ok) {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('username', data.username);
+                    console.log('Token stored:', localStorage.getItem('token')); // Debug
                     closeModal();
                     window.location.href = '/chat.html';
                 } else {
-                    serverError.textContent = data.error || 'An error occurred';
+                    serverError.textContent = data.error || 'Login failed. Please try again.';
                     serverError.style.display = 'block';
                 }
             } catch (error) {
-                serverError.textContent = 'Network error, please try again';
+                console.error('Login error:', error);
+                serverError.textContent = 'Network error: Unable to connect to server.';
                 serverError.style.display = 'block';
             } finally {
                 loginButton.disabled = false;
