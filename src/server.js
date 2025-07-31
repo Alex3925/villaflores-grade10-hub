@@ -14,14 +14,29 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-const users = [
-    'admin', 'website owner', 'user1', 'user2', 'user3', 'user4', 'user5', 'user6', 'user7', 'user8',
-    'user9', 'user10', 'user11', 'user12', 'user13', 'user14', 'user15', 'user16', 'user17', 'user18',
-    'user19', 'user20', 'user21', 'user22', 'user23', 'user24', 'user25', 'user26', 'user27', 'user28',
-    'user29', 'user30', 'user31', 'user32', 'user33', 'user34', 'user35', 'user36', 'user37', 'user38',
-    'user39', 'user40', 'user41', 'user42', 'user43', 'user44', 'user45', 'user46', 'user47', 'user48',
-    'user49', 'user50', 'user51', 'user52', 'user53', 'user54', 'user55', 'user56', 'user57', 'user58'
-].reduce((map, u) => (map[u] = { password: 'pass123' }, map), {});
+const users = {
+    'admin': { password: 'pass123' }, 'website owner': { password: 'pass123' },
+    'user1': { password: 'pass123' }, 'user2': { password: 'pass123' }, 'user3': { password: 'pass123' },
+    'user4': { password: 'pass123' }, 'user5': { password: 'pass123' }, 'user6': { password: 'pass123' },
+    'user7': { password: 'pass123' }, 'user8': { password: 'pass123' }, 'user9': { password: 'pass123' },
+    'user10': { password: 'pass123' }, 'user11': { password: 'pass123' }, 'user12': { password: 'pass123' },
+    'user13': { password: 'pass123' }, 'user14': { password: 'pass123' }, 'user15': { password: 'pass123' },
+    'user16': { password: 'pass123' }, 'user17': { password: 'pass123' }, 'user18': { password: 'pass123' },
+    'user19': { password: 'pass123' }, 'user20': { password: 'pass123' }, 'user21': { password: 'pass123' },
+    'user22': { password: 'pass123' }, 'user23': { password: 'pass123' }, 'user24': { password: 'pass123' },
+    'user25': { password: 'pass123' }, 'user26': { password: 'pass123' }, 'user27': { password: 'pass123' },
+    'user28': { password: 'pass123' }, 'user29': { password: 'pass123' }, 'user30': { password: 'pass123' },
+    'user31': { password: 'pass123' }, 'user32': { password: 'pass123' }, 'user33': { password: 'pass123' },
+    'user34': { password: 'pass123' }, 'user35': { password: 'pass123' }, 'user36': { password: 'pass123' },
+    'user37': { password: 'pass123' }, 'user38': { password: 'pass123' }, 'user39': { password: 'pass123' },
+    'user40': { password: 'pass123' }, 'user41': { password: 'pass123' }, 'user42': { password: 'pass123' },
+    'user43': { password: 'pass123' }, 'user44': { password: 'pass123' }, 'user45': { password: 'pass123' },
+    'user46': { password: 'pass123' }, 'user47': { password: 'pass123' }, 'user48': { password: 'pass123' },
+    'user49': { password: 'pass123' }, 'user50': { password: 'pass123' }, 'user51': { password: 'pass123' },
+    'user52': { password: 'pass123' }, 'user53': { password: 'pass123' }, 'user54': { password: 'pass123' },
+    'user55': { password: 'pass123' }, 'user56': { password: 'pass123' }, 'user57': { password: 'pass123' },
+    'user58': { password: 'pass123' }
+};
 
 const messages = [];
 const onlineUsers = new Map();
@@ -43,40 +58,42 @@ io.use((socket, next) => {
 
 io.on('connection', (socket) => {
     onlineUsers.set(socket.user.username, socket.id);
-    io.emit('userPresence', users.map(u => ({ username: u, online: onlineUsers.has(u) })));
-
-    socket.emit('initialMessages', messages.filter(m => m.category === 'schoolWorks').slice(-10));
+    io.emit('userPresence', Object.keys(users).map(u => ({ username: u, online: onlineUsers.has(u) })));
 
     socket.on('register', (data) => {
         socket.user.username = data.username;
         onlineUsers.set(data.username, socket.id);
-        io.emit('userPresence', users.map(u => ({ username: u, online: onlineUsers.has(u) })));
+        io.emit('userPresence', Object.keys(users).map(u => ({ username: u, online: onlineUsers.has(u) })));
+    });
+
+    socket.on('joinChat', (data) => {
+        socket.join(data.username + '-' + data.target);
+        socket.join(data.target + '-' + data.username);
     });
 
     socket.on('sendMessage', (message) => {
-        const newMessage = { ...message, username: socket.user.username, timestamp: new Date().toISOString(), category: message.category || 'schoolWorks' };
+        const newMessage = {
+            id: messages.length + 1,
+            username: socket.user.username,
+            text: message.text,
+            timestamp: new Date().toISOString(),
+            target: message.target,
+            file: message.file || null
+        };
         messages.push(newMessage);
-        io.emit('newMessage', newMessage);
+        io.to(socket.user.username + '-' + message.target).emit('newMessage', newMessage);
+        io.to(message.target + '-' + socket.user.username).emit('newMessage', newMessage);
     });
 
-    socket.on('offer', (data) => {
-        const targetSocketId = onlineUsers.get(data.target);
-        if (targetSocketId) io.to(targetSocketId).emit('offer', data);
-    });
-
-    socket.on('answer', (data) => {
-        const targetSocketId = onlineUsers.get(data.target);
-        if (targetSocketId) io.to(targetSocketId).emit('answer', data);
-    });
-
-    socket.on('ice-candidate', (data) => {
-        const targetSocketId = onlineUsers.get(data.target);
-        if (targetSocketId) io.to(targetSocketId).emit('ice-candidate', data);
+    socket.on('typing', (data) => {
+        if (data.target) {
+            io.to(data.target + '-' + data.username).emit('typing', { username: data.username, isTyping: data.isTyping });
+        }
     });
 
     socket.on('disconnect', () => {
         onlineUsers.delete(socket.user.username);
-        io.emit('userPresence', users.map(u => ({ username: u, online: onlineUsers.has(u) })));
+        io.emit('userPresence', Object.keys(users).map(u => ({ username: u, online: onlineUsers.has(u) })));
     });
 });
 
