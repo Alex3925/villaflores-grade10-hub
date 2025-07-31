@@ -12,213 +12,193 @@
     <link rel="manifest" href="https://villaflorescollege.s3.us-west-2.amazonaws.com/favicons/site.webmanifest">
     
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <style>
         :root {
-            --primary: #00E1FF; /* Vibrant cyan */
-            --secondary: #FF007A; /* Neon pink */
-            --accent: #FFD700; /* Gold */
-            --dark: #0D1B2A; /* Deep navy */
-            --light: #E5E5E5; /* Soft gray */
-            --glow: rgba(0, 225, 255, 0.6);
-            --glass-bg: rgba(255, 255, 255, 0.1);
+            --messenger-blue: #0084FF;
+            --messenger-light: #F0F2F5;
+            --messenger-dark: #1C2526;
+            --messenger-gray: #B0B3B8;
+            --white: #FFFFFF;
         }
         [data-theme="dark"] {
-            --light: #0D1B2A;
-            --dark: #E5E5E5;
+            --messenger-light: #1C2526;
+            --messenger-dark: #F0F2F5;
+            --white: #2A2F32;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
         body {
-            min-height: 100vh; display: flex; background: linear-gradient(135deg, var(--dark), #1A2A44);
-            color: var(--light); overflow-x: hidden; transition: background 0.5s;
-        }
-        .backdrop {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, var(--glow), transparent 70%);
-            opacity: 0.3; z-index: -1; animation: pulse 5s infinite;
+            min-height: 100vh; display: flex; background: var(--messenger-light);
+            color: var(--messenger-dark); overflow-x: hidden; transition: background 0.3s;
         }
         .container {
-            display: grid; grid-template-columns: 300px 1fr 400px; height: 100vh; overflow: hidden;
-            max-width: 1600px; margin: 0 auto; padding: 1rem; gap: 1rem;
+            display: flex; height: 100vh; max-width: 1200px; margin: 0 auto; width: 100%;
         }
         .sidebar {
-            background: var(--glass-bg); backdrop-filter: blur(10px); border-radius: 15px;
-            padding: 1.5rem; overflow-y: auto; border: 1px solid var(--glow);
-            animation: slideInLeft 0.5s ease-out;
+            width: 340px; background: var(--white); border-right: 1px solid var(--messenger-gray);
+            overflow-y: auto; display: flex; flex-direction: column;
         }
-        .sidebar h2 {
-            font-family: 'Orbitron', sans-serif; font-size: 1.5rem; color: var(--accent);
-            margin-bottom: 1.5rem; text-shadow: 0 0 10px var(--glow);
+        .sidebar-header {
+            padding: 10px 15px; border-bottom: 1px solid var(--messenger-gray);
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .category { margin-bottom: 2rem; }
-        .category h3 {
-            font-size: 1.1rem; color: var(--secondary); margin-bottom: 0.8rem;
-            text-transform: uppercase; letter-spacing: 1px;
+        .sidebar-header h2 {
+            font-size: 1.1rem; font-weight: 500; color: var(--messenger-dark);
         }
-        .user-list { list-style: none; }
+        .sidebar-search {
+            padding: 10px 15px; border-bottom: 1px solid var(--messenger-gray);
+        }
+        .sidebar-search input {
+            width: 100%; padding: 8px; border: 1px solid var(--messenger-gray);
+            border-radius: 20px; font-size: 0.9rem;
+        }
+        .user-list {
+            flex: 1; list-style: none; overflow-y: auto;
+        }
         .user-list li {
-            display: flex; align-items: center; padding: 0.7rem; border-radius: 10px;
-            transition: all 0.3s; cursor: pointer; position: relative;
+            display: flex; align-items: center; padding: 10px 15px; cursor: pointer;
+            transition: background 0.2s;
         }
-        .user-list li:hover {
-            background: var(--glow); color: var(--dark); transform: translateX(5px);
+        .user-list li:hover { background: #EDEFF1; }
+        .user-list li.active { background: #EDEFF1; }
+        .user-avatar {
+            width: 40px; height: 40px; border-radius: 50%; background: #CCC;
+            margin-right: 10px; overflow: hidden;
         }
-        .user-status {
-            width: 12px; height: 12px; border-radius: 50%; margin-right: 0.8rem;
-            background: #00FF00; box-shadow: 0 0 5px #00FF00;
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-info { flex: 1; }
+        .user-info .name { font-size: 0.95rem; font-weight: 500; color: var(--messenger-dark); }
+        .user-info .last-message { font-size: 0.85rem; color: var(--messenger-gray); }
+        .user-status { width: 10px; height: 10px; border-radius: 50%; margin-left: 10px; }
+        .user-status.online { background: #00E676; }
+        .user-status.offline { background: #B0B3B8; }
+        .chat-area {
+            flex: 1; display: flex; flex-direction: column; background: var(--white);
         }
-        .user-status.offline { background: #666; box-shadow: none; }
-        .chat-area, .call-panel {
-            background: var(--glass-bg); backdrop-filter: blur(10px); border-radius: 15px;
-            padding: 1.5rem; overflow-y: auto; border: 1px solid var(--glow);
-            animation: fadeIn 0.5s ease-out;
-        }
-        .tabs {
-            display: flex; gap: 1rem; margin-bottom: 1rem; padding: 0.5rem;
-            background: var(--glass-bg); border-radius: 10px;
-        }
-        .tab-button {
-            padding: 0.7rem 1.5rem; background: transparent; border: none;
-            color: var(--light); font-weight: 500; cursor: pointer; transition: all 0.3s;
-        }
-        .tab-button.active { color: var(--primary); text-shadow: 0 0 15px var(--glow); }
-        .tab-button:hover { color: var(--accent); transform: scale(1.05); }
         .chat-header {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;
-            border-bottom: 1px solid var(--glow); padding-bottom: 0.5rem;
+            padding: 10px 15px; border-bottom: 1px solid var(--messenger-gray);
+            display: flex; align-items: center; justify-content: space-between;
         }
-        .chat-header span {
-            font-size: 1.2rem; font-weight: 500; color: var(--accent);
+        .chat-header .user-info {
+            display: flex; align-items: center;
         }
-        .chat-header a { color: var(--secondary); text-decoration: none; font-size: 0.9rem; }
-        .chat-messages { flex: 1; padding: 1rem 0; overflow-y: auto; }
+        .chat-header .name { font-size: 1rem; font-weight: 500; margin-right: 10px; }
+        .chat-header .call-btn {
+            background: var(--messenger-blue); color: var(--white); border: none;
+            border-radius: 50%; width: 32px; height: 32px; font-size: 1rem;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .chat-header .call-btn:hover { background: #0066CC; }
+        .chat-messages {
+            flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column;
+        }
         .message {
-            margin: 0.5rem 0; padding: 1rem; border-radius: 15px; max-width: 65%;
-            position: relative; animation: slideInRight 0.3s ease-out;
+            max-width: 60%; margin: 5px 0; padding: 10px; border-radius: 10px;
+            font-size: 0.9rem; position: relative; word-wrap: break-word;
         }
-        .message.sent { background: var(--primary); margin-left: auto; }
-        .message.received { background: var(--secondary); }
-        .message-header { font-size: 0.9rem; color: var(--light); margin-bottom: 0.3rem; }
-        .message-timestamp { font-size: 0.7rem; color: #BBB; text-align: right; }
+        .message.sent { background: var(--messenger-blue); color: var(--white); margin-left: auto; }
+        .message.received { background: #EDEFF1; color: var(--messenger-dark); }
+        .message .time { font-size: 0.7rem; color: var(--messenger-gray); margin-top: 5px; }
+        .typing-indicator {
+            display: flex; align-items: center; padding: 5px 10px; background: #EDEFF1;
+            border-radius: 10px; font-size: 0.9rem; color: var(--messenger-gray); margin: 5px 0;
+        }
+        .typing-indicator span {
+            width: 6px; height: 6px; background: var(--messenger-gray); border-radius: 50%;
+            margin: 0 2px; animation: typing 1.4s infinite;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
         .chat-input {
-            display: flex; gap: 0.5rem; padding: 0.5rem 0; border-top: 1px solid var(--glow);
+            padding: 10px 15px; border-top: 1px solid var(--messenger-gray);
+            display: flex; align-items: center; gap: 10px;
         }
         .chat-input input[type="text"] {
-            flex: 1; padding: 0.8rem; border: none; border-radius: 20px;
-            background: rgba(255, 255, 255, 0.2); color: var(--light); font-size: 1rem;
+            flex: 1; padding: 8px 12px; border: 1px solid var(--messenger-gray);
+            border-radius: 20px; font-size: 0.9rem; background: var(--white);
         }
-        .chat-input button {
-            background: var(--primary); border: none; border-radius: 50%; width: 40px; height: 40px;
-            color: var(--dark); font-size: 1rem; cursor: pointer; transition: all 0.3s;
+        .chat-input .emoji-btn, .chat-input .attach-btn {
+            background: none; border: none; font-size: 1.1rem; color: var(--messenger-gray);
+            cursor: pointer; transition: color 0.2s;
         }
-        .chat-input button:hover { background: var(--accent); transform: scale(1.1); }
-        .call-panel { text-align: center; }
-        .call-panel h2 { font-size: 1.4rem; color: var(--accent); margin-bottom: 1rem; }
-        .call-panel video {
-            width: 100%; max-width: 350px; border-radius: 10px; margin: 0.5rem 0;
-            background: #000; box-shadow: 0 0 10px var(--glow);
+        .chat-input .emoji-btn:hover, .chat-input .attach-btn:hover { color: var(--messenger-blue); }
+        .chat-input button[type="submit"] {
+            background: var(--messenger-blue); color: var(--white); border: none;
+            border-radius: 50%; width: 36px; height: 36px; font-size: 1rem;
+            cursor: pointer; transition: background 0.2s;
         }
-        .call-panel button {
-            padding: 1rem 2rem; background: var(--secondary); color: var(--light);
-            border: none; border-radius: 25px; margin: 0.5rem; font-size: 1rem;
-            transition: all 0.3s;
+        .chat-input button[type="submit"]:hover { background: #0066CC; }
+        .emoji-picker {
+            display: none; position: absolute; bottom: 60px; left: 15px;
+            background: var(--white); border: 1px solid var(--messenger-gray);
+            border-radius: 10px; padding: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        .call-panel button:hover { background: var(--primary); transform: translateY(-2px); }
-        .call-panel button:disabled { background: #666; cursor: not-allowed; }
+        .emoji-picker button {
+            background: none; border: none; font-size: 1.2rem; cursor: pointer;
+            padding: 5px; transition: transform 0.2s;
+        }
+        .emoji-picker button:hover { transform: scale(1.2); }
         .theme-toggle {
-            position: fixed; top: 1rem; right: 1rem; background: var(--primary);
-            color: var(--light); border: none; border-radius: 50%; width: 45px;
-            height: 45px; font-size: 1.3rem; cursor: pointer; transition: all 0.3s;
+            position: fixed; top: 10px; right: 10px; background: var(--messenger-blue);
+            color: var(--white); border: none; border-radius: 50%; width: 40px;
+            height: 40px; font-size: 1.2rem; cursor: pointer; transition: transform 0.3s;
         }
-        .theme-toggle:hover { transform: scale(1.2); background: var(--accent); }
-        .notification {
-            position: fixed; top: 4rem; right: 1rem; background: var(--secondary);
-            color: var(--light); padding: 0.8rem 1.2rem; border-radius: 10px;
-            box-shadow: 0 0 10px var(--glow); display: none; animation: popIn 0.5s;
-        }
-        .settings {
-            position: fixed; top: 6rem; right: 1rem; background: var(--glass-bg);
-            backdrop-filter: blur(10px); padding: 1rem; border-radius: 10px;
-            border: 1px solid var(--glow); display: none; width: 250px;
-        }
-        .settings label { display: block; margin: 0.5rem 0; color: var(--light); }
-        .settings input { margin-left: 0.5rem; }
-        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.5; } }
-        @keyframes slideInLeft { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes slideInRight { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @media (max-width: 1200px) {
-            .container { grid-template-columns: 250px 1fr; }
-            .call-panel { display: none; }
+        .theme-toggle:hover { transform: scale(1.1); }
+        @keyframes typing {
+            0% { transform: translateY(0); }
+            20% { transform: translateY(-3px); }
+            40% { transform: translateY(0); }
         }
         @media (max-width: 800px) {
-            .container { grid-template-columns: 1fr; }
-            .sidebar { position: fixed; top: 0; left: -250px; height: 100%; transition: left 0.3s; }
-            .sidebar.active { left: 0; }
-            .chat-area { margin-left: 0; }
-            .theme-toggle { top: 0.5rem; right: 0.5rem; }
+            .container { flex-direction: column; }
+            .sidebar { width: 100%; height: 60px; flex-direction: row; overflow-x: auto; }
+            .user-list { display: flex; flex-direction: row; }
+            .user-list li { flex: 0 0 auto; }
+            .chat-area { flex: 1; }
         }
     </style>
 </head>
 <body data-theme="light">
-    <div class="backdrop"></div>
     <button class="theme-toggle" aria-label="Toggle theme" onclick="toggleTheme()">🌙</button>
-    <button class="sidebar-toggle" aria-label="Toggle sidebar" onclick="toggleSidebar()">☰</button>
-    <div class="notification" id="notification"></div>
-    <div class="settings" id="settings">
-        <label><input type="checkbox" id="notifications" checked> Enable Notifications</label>
-        <label><input type="color" id="themeColor" value="#00E1FF"> Accent Color</label>
-    </div>
-    
     <div class="container">
-        <div class="sidebar" id="sidebar">
-            <h2>Chat Hub</h2>
-            <div class="category">
-                <h3>School Works</h3>
-                <ul class="user-list" id="schoolWorksUsers"></ul>
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Chats</h2>
+                <button class="theme-toggle" aria-label="Toggle theme" onclick="toggleTheme()">🌙</button>
             </div>
-            <div class="category">
-                <h3>General</h3>
-                <ul class="user-list" id="generalUsers"></ul>
+            <div class="sidebar-search">
+                <input type="text" placeholder="Search chats..." aria-label="Search chats">
             </div>
-            <button onclick="toggleSettings()" aria-label="Open settings">⚙️ Settings</button>
+            <ul class="user-list" id="userList"></ul>
         </div>
         <div class="chat-area">
-            <div class="tabs">
-                <button class="tab-button active" onclick="switchTab('chat')">Chat</button>
-                <button class="tab-button" onclick="switchTab('call')">Call Room</button>
-            </div>
-            <div class="chat-content active" id="chatContent">
-                <div class="chat-header">
-                    <span>Welcome, <span id="username"></span></span>
-                    <a href="/index.html" aria-label="Logout">Logout</a>
+            <div class="chat-header" id="chatHeader">
+                <div class="user-info">
+                    <div class="user-avatar"></div>
+                    <div class="name" id="selectedUser"></div>
                 </div>
-                <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
-                <form class="chat-input" id="chatForm">
-                    <input type="text" id="messageInput" placeholder="Type a message..." required aria-label="Message input">
-                    <button type="submit" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
-                </form>
+                <button class="call-btn" id="startCall" aria-label="Start call"><i class="fas fa-phone"></i></button>
             </div>
-            <div class="call-content" id="callContent" style="display: none;">
-                <div class="chat-header">
-                    <span>Call Room</span>
-                    <button onclick="endCall()" aria-label="End call">✖️</button>
-                </div>
-                <video id="localVideo" autoplay muted playsinline></video>
-                <video id="remoteVideo" autoplay playsinline></video>
-                <div class="call-controls">
-                    <button id="toggleMic" aria-label="Toggle microphone"><i class="fas fa-microphone"></i></button>
-                    <button id="toggleVideo" aria-label="Toggle video"><i class="fas fa-video"></i></button>
-                </div>
+            <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+            <div class="typing-indicator" id="typingIndicator" style="display: none;">
+                <span></span><span></span><span></span> Typing...
             </div>
-        </div>
-        <div class="call-panel">
-            <h2>Call Panel</h2>
-            <button id="startVoiceCall" aria-label="Start voice call">Voice Call</button>
-            <button id="startVideoCall" aria-label="Start video call">Video Call</button>
+            <div class="chat-input">
+                <button class="emoji-btn" id="emojiBtn" aria-label="Open emoji picker"><i class="far fa-smile"></i></button>
+                <div class="emoji-picker" id="emojiPicker">
+                    <button onclick="addEmoji('😊')">😊</button>
+                    <button onclick="addEmoji('👍')">👍</button>
+                    <button onclick="addEmoji('❤️')">❤️</button>
+                    <button onclick="addEmoji('😂')">😂</button>
+                    <button onclick="addEmoji('🎉')">🎉</button>
+                </div>
+                <input type="text" id="messageInput" placeholder="Type a message..." required aria-label="Message input">
+                <button class="attach-btn" id="attachBtn" aria-label="Attach file"><i class="fas fa-paperclip"></i></button>
+                <input type="file" id="fileInput" style="display: none;" accept=".pdf,.doc,.docx,.txt,.jpg,.png">
+                <button type="submit" aria-label="Send message" form="chatForm"><i class="fas fa-paper-plane"></i></button>
+            </div>
         </div>
     </div>
 
@@ -230,32 +210,23 @@
         });
 
         const username = localStorage.getItem('username') || 'User';
-        document.getElementById('username').textContent = username;
+        const userList = document.getElementById('userList');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatForm = document.querySelector('.chat-input');
+        const messageInput = document.getElementById('messageInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const selectedUser = document.getElementById('selectedUser');
+        const chatHeader = document.getElementById('chatHeader');
+        const startCallBtn = document.getElementById('startCall');
+        const emojiBtn = document.getElementById('emojiBtn');
+        const emojiPicker = document.getElementById('emojiPicker');
+        const attachBtn = document.getElementById('attachBtn');
+        const fileInput = document.getElementById('fileInput');
+        const localVideo = null; // Placeholder for call UI (to be added)
 
         if (!localStorage.getItem('token')) {
             window.location.href = '/index.html';
         }
-
-        const chatMessages = document.getElementById('chatMessages');
-        const chatForm = document.getElementById('chatForm');
-        const messageInput = document.getElementById('messageInput');
-        const schoolWorksUsers = document.getElementById('schoolWorksUsers');
-        const generalUsers = document.getElementById('generalUsers');
-        const startVoiceCallBtn = document.getElementById('startVoiceCall');
-        const startVideoCallBtn = document.getElementById('startVideoCall');
-        const localVideo = document.getElementById('localVideo');
-        const remoteVideo = document.getElementById('remoteVideo');
-        const toggleMicBtn = document.getElementById('toggleMic');
-        const toggleVideoBtn = document.getElementById('toggleVideo');
-        const notification = document.getElementById('notification');
-        const settings = document.getElementById('settings');
-        const themeColor = document.getElementById('themeColor');
-
-        let targetUser = null;
-        let peerConnection = null;
-        let localStream = null;
-        let isMicOn = true;
-        let isVideoOn = true;
 
         const users = [
             'admin', 'website owner', 'user1', 'user2', 'user3', 'user4', 'user5', 'user6', 'user7', 'user8',
@@ -271,186 +242,124 @@
             const theme = body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
             body.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
-            document.querySelector('.theme-toggle').textContent = theme === 'light' ? '🌙' : '☀️';
-            updateThemeColor();
+            document.querySelectorAll('.theme-toggle').forEach(btn => btn.textContent = theme === 'light' ? '🌙' : '☀️');
         }
 
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.chat-content, .call-content').forEach(content => content.style.display = 'none');
-            document.querySelector(`.tab-button[onclick="switchTab('${tab}')"]`).classList.add('active');
-            document.getElementById(tab === 'chat' ? 'chatContent' : 'callContent').style.display = 'block';
-        }
-
-        function updateUserList(category, userListElement) {
-            userListElement.innerHTML = '';
+        function updateUserList() {
+            userList.innerHTML = '';
             users.forEach(user => {
                 const li = document.createElement('li');
-                li.innerHTML = `<span class="user-status ${user === username ? '' : 'offline'}"></span>${user}`;
-                li.onclick = () => {
-                    targetUser = user;
-                    startVoiceCallBtn.disabled = user === username;
-                    startVideoCallBtn.disabled = user === username;
-                    showNotification(`Selected ${user} for call`);
-                };
-                userListElement.appendChild(li);
+                li.innerHTML = `
+                    <div class="user-avatar"></div>
+                    <div class="user-info">
+                        <div class="name">${user}</div>
+                        <div class="last-message">Last message...</div>
+                    </div>
+                    <div class="user-status ${user === username ? 'online' : 'offline'}"></div>
+                `;
+                li.onclick = () => selectUser(user);
+                if (user === localStorage.getItem('selectedUser')) li.classList.add('active');
+                userList.appendChild(li);
             });
         }
 
-        function showNotification(message) {
-            if (document.getElementById('notifications').checked) {
-                notification.textContent = message;
-                notification.style.display = 'block';
-                setTimeout(() => notification.style.display = 'none', 3000);
-            }
+        function selectUser(user) {
+            localStorage.setItem('selectedUser', user);
+            selectedUser.textContent = user;
+            chatHeader.style.display = user === username ? 'none' : 'flex';
+            startCallBtn.style.display = user === username ? 'none' : 'block';
+            chatMessages.innerHTML = '';
+            updateUserList();
+            socket.emit('joinChat', { username, target: user });
         }
 
-        function toggleSettings() {
-            settings.style.display = settings.style.display === 'block' ? 'none' : 'block';
+        function addEmoji(emoji) {
+            messageInput.value += emoji;
+            emojiPicker.style.display = 'none';
+            messageInput.focus();
         }
 
-        function updateThemeColor() {
-            const color = themeColor.value;
-            document.documentElement.style.setProperty('--primary', color);
-            localStorage.setProperty('--primary', color);
+        function displayMessage(message) {
+            const div = document.createElement('div');
+            div.className = `message ${message.username === username ? 'sent' : 'received'}`;
+            div.innerHTML = `${message.text}<div class="time">${new Date(message.timestamp).toLocaleTimeString()}</div>`;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
-
-        themeColor.addEventListener('change', updateThemeColor);
 
         socket.on('connect', () => {
             console.log('Connected');
             socket.emit('register', { username });
-            updateUserList('schoolWorks', schoolWorksUsers);
-            updateUserList('general', generalUsers);
+            updateUserList();
+            const selected = localStorage.getItem('selectedUser');
+            if (selected) selectUser(selected);
         });
 
         socket.on('userPresence', (users) => {
-            updateUserList('schoolWorks', schoolWorksUsers);
-            updateUserList('general', generalUsers);
+            updateUserList();
         });
 
         socket.on('newMessage', (message) => {
-            const div = document.createElement('div');
-            div.className = `message ${message.username === username ? 'sent' : 'received'}`;
-            div.innerHTML = `<div class="message-header">${message.username}</div><div>${message.text}</div><div class="message-timestamp">${new Date(message.timestamp).toLocaleTimeString()}</div>`;
-            chatMessages.appendChild(div);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            showNotification(`New message from ${message.username}`);
+            if (message.target === localStorage.getItem('selectedUser') || message.username === localStorage.getItem('selectedUser')) {
+                displayMessage(message);
+            }
+            const li = Array.from(userList.children).find(li => li.querySelector('.name').textContent === message.username);
+            if (li) li.querySelector('.last-message').textContent = message.text;
+        });
+
+        socket.on('typing', (data) => {
+            if (data.username === localStorage.getItem('selectedUser')) {
+                typingIndicator.style.display = data.isTyping ? 'flex' : 'none';
+            }
         });
 
         chatForm.addEventListener('submit', (event) => {
             event.preventDefault();
             const text = messageInput.value.trim();
-            if (text) {
-                socket.emit('sendMessage', { text, category: 'schoolWorks' });
+            if (text && localStorage.getItem('selectedUser')) {
+                socket.emit('sendMessage', { text, target: localStorage.getItem('selectedUser') });
                 messageInput.value = '';
             }
+        });
+
+        messageInput.addEventListener('input', () => {
+            socket.emit('typing', { username, isTyping: messageInput.value.trim().length > 0, target: localStorage.getItem('selectedUser') });
         });
 
         document.querySelector('.chat-header a').addEventListener('click', () => {
             localStorage.removeItem('token');
             localStorage.removeItem('username');
-            if (peerConnection) peerConnection.close();
+            localStorage.removeItem('selectedUser');
             socket.disconnect();
             window.location.href = '/index.html';
         });
 
-        const configuration = {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
-            ]
-        };
+        emojiBtn.addEventListener('click', () => {
+            emojiPicker.style.display = emojiPicker.style.display === 'block' ? 'none' : 'block';
+        });
 
-        async function startCall(isVideo) {
-            if (!targetUser) return alert('Select a user first!');
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
-                localVideo.srcObject = localStream;
-                document.getElementById('callContent').style.display = 'block';
-                switchTab('call');
+        attachBtn.addEventListener('click', () => fileInput.click());
 
-                peerConnection = new RTCPeerConnection(configuration);
-                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-                peerConnection.ontrack = (event) => {
-                    remoteVideo.srcObject = event.streams[0];
-                    showNotification('Call connected with ' + targetUser);
-                };
-
-                peerConnection.onicecandidate = (event) => event.candidate && socket.emit('ice-candidate', { target: targetUser, candidate: event.candidate });
-                peerConnection.oniceconnectionstatechange = () => {
-                    if (peerConnection.iceConnectionState === 'disconnected') endCall();
-                };
-
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-                socket.emit('offer', { offer, target: targetUser, sender: username });
-            } catch (e) {
-                alert('Call failed: ' + e.message);
-                endCall();
-            }
-        }
-
-        function endCall() {
-            if (peerConnection) peerConnection.close();
-            if (localStream) localStream.getTracks().forEach(track => track.stop());
-            peerConnection = null;
-            localStream = null;
-            localVideo.srcObject = null;
-            remoteVideo.srcObject = null;
-            document.getElementById('callContent').style.display = 'none';
-            switchTab('chat');
-            socket.emit('end-call', { target: targetUser });
-            showNotification('Call ended');
-        }
-
-        startVoiceCallBtn.addEventListener('click', () => startCall(false));
-        startVideoCallBtn.addEventListener('click', () => startCall(true));
-
-        toggleMicBtn.addEventListener('click', () => {
-            if (localStream) {
-                isMicOn = !isMicOn;
-                localStream.getAudioTracks().forEach(track => track.enabled = isMicOn);
-                toggleMicBtn.innerHTML = `<i class="fas fa-microphone${isMicOn ? '' : '-slash'}"></i>`;
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file && localStorage.getItem('selectedUser')) {
+                const reader = new FileReader();
+                reader.onload = (e) => socket.emit('sendMessage', { text: `[File: ${file.name}]`, file: e.target.result, target: localStorage.getItem('selectedUser') });
+                reader.readAsDataURL(file);
+                fileInput.value = '';
             }
         });
 
-        toggleVideoBtn.addEventListener('click', () => {
-            if (localStream) {
-                isVideoOn = !isVideoOn;
-                localStream.getVideoTracks().forEach(track => track.enabled = isVideoOn);
-                toggleVideoBtn.innerHTML = `<i class="fas fa-video${isVideoOn ? '' : '-slash'}"></i>`;
-            }
+        startCallBtn.addEventListener('click', () => {
+            alert('Call functionality placeholder - implement WebRTC as needed');
+            // Add WebRTC logic here (similar to previous versions) if desired
         });
 
-        socket.on('offer', async (data) => {
-            if (data.target === username) {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: data.offer.type === 'video' });
-                localVideo.srcObject = localStream;
-                document.getElementById('callContent').style.display = 'block';
-                switchTab('call');
-
-                peerConnection = new RTCPeerConnection(configuration);
-                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-                peerConnection.ontrack = (event) => remoteVideo.srcObject = event.streams[0];
-                peerConnection.onicecandidate = (event) => event.candidate && socket.emit('ice-candidate', { target: data.sender, candidate: event.candidate });
-
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-                socket.emit('answer', { answer, target: data.sender });
+        document.addEventListener('click', (event) => {
+            if (!emojiPicker.contains(event.target) && event.target !== emojiBtn) {
+                emojiPicker.style.display = 'none';
             }
         });
-
-        socket.on('answer', (data) => data.target === username && peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer)));
-        socket.on('ice-candidate', (data) => data.target === username && peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate)));
-        socket.on('end-call', (data) => data.target === username && endCall());
     </script>
 </body>
 </html>
