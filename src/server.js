@@ -20,6 +20,7 @@ const users = [
 ];
 
 const messages = [];
+const onlineUsers = new Set();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 
@@ -58,6 +59,8 @@ io.use((socket, next) => {
 
 io.on('connection', (socket) => {
     console.log(`User ${socket.user.username} connected`);
+    onlineUsers.add(socket.user.username);
+    io.emit('userPresence', Array.from(onlineUsers));
 
     socket.emit('initialMessages', messages.slice(-10));
 
@@ -67,7 +70,8 @@ io.on('connection', (socket) => {
             username: socket.user.username,
             text: message.text,
             timestamp: new Date().toISOString(),
-            file: message.file || null
+            file: message.file || null,
+            reactions: {}
         };
         messages.push(newMessage);
         io.emit('newMessage', newMessage);
@@ -79,6 +83,25 @@ io.on('connection', (socket) => {
             if (index !== -1) {
                 messages.splice(index, 1);
                 io.emit('updateMessages', messages.slice(-10));
+            }
+        }
+    });
+
+    socket.on('typing', (data) => {
+        if (data.isTyping) {
+            socket.broadcast.emit('typing', { username: data.username });
+        }
+    });
+
+    socket.on('addReaction', (data) => {
+        const message = messages.find(m => m.id === data.messageId);
+        if (message) {
+            if (!message.reactions[data.emoji]) {
+                message.reactions[data.emoji] = [];
+            }
+            if (!message.reactions[data.emoji].includes(data.username)) {
+                message.reactions[data.emoji].push(data.username);
+                io.emit('reactionUpdate', message);
             }
         }
     });
@@ -113,6 +136,8 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log(`User ${socket.user.username} disconnected`);
+        onlineUsers.delete(socket.user.username);
+        io.emit('userPresence', Array.from(onlineUsers));
     });
 });
 
